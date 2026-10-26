@@ -1,0 +1,11 @@
+Pasta de ÁUDIOS da Nagatoro — situação: antiamor
+
+Coloque aqui os áudios (.mp3, .ogg, .m4a, .opus ou .wav). Pode colocar
+quantos quiser: ela sorteia um, sem repetir o mesmo duas vezes seguidas.
+Também dá pra subir pelo próprio bot: configurar-bot → SUBIR ÁUDIO.
+
+Se a pasta de MENSAGENS dessa situação (src/midias/mensagens/antiamor) também
+tiver texto, ela REVEZA: uma vez áudio, outra vez mensagem.
+Pasta vazia = não manda áudio (usa só as mensagens, se tiver).
+
+Este LEIA-ME é ignorado pelo bot.

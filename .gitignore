@@ -1,0 +1,20 @@
+# 📦 dependências (instaladas com npm install)
+node_modules/
+package-lock.json
+
+# 🔐 sessão do WhatsApp — NUNCA suba isso
+auth_info/
+
+# 💾 dados e configurações de cada instalação
+database/
+src/dados/*
+!src/dados/.gitkeep
+
+# 🧹 temporários e binários baixados pelo bot
+yt-dlp
+yt-dlp.*
+temp/
+tmp/
+media/
+*.tmp
+*.log

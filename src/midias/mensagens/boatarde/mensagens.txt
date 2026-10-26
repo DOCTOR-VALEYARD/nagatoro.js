@@ -1,0 +1,7 @@
+🌤️ Boa tarde, {usuario}! Já fez algo útil hoje ou só respirou?
+😏 Boa tarde, {usuario}... apareceu só agora? Tava se escondendo de mim, é?
+🙄 Boa tarde, {usuario}. Que preguiça de você, mas boa tarde mesmo assim.
+🤭 Boa tarde, senpai {usuario}! Almoçou? Tá com cara de quem comeu e dormiu.
+😈 Boa tarde, {usuario}. Metade do dia já foi e você continua o(a) mesmo(a). Impressionante.
+💅 Boa tarde, {usuario}~ Se veio puxar assunto, capricha que eu tô exigente hoje.
+😼 Boa tarde! {usuario} lembrou que o grupo existe. Que honra... só que não.

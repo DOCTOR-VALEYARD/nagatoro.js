@@ -1,0 +1,9 @@
+# Bom dia — 1 mensagem por linha. {usuario} marca a pessoa.
+☀️ Bom dia, {usuario}! Acordou cedo pra quê? Ninguém tava com saudade. Hehe~
+😏 Bom dia, {usuario}... essa cara de sono tá até fofa. Mentira, tá horrível.
+🙄 Olha quem levantou da cama! Bom dia, {usuario}. Já tomou banho ou vai ficar assim?
+🤭 Bom dia, senpai {usuario}! Pronto(a) pra passar vergonha mais um dia?
+😈 Bom dia, {usuario}. Hoje eu tô de bom humor... então só vou te zoar um pouquinho.
+💅 Bom dia, {usuario}! Café, coragem e paciência, porque comigo você vai precisar.
+😼 Bom diaaa, {usuario}~ Dormiu bem? Pena que acordou.
+🖤 Bom dia pra você também, {usuario}. Agora some que eu tô ocupada.

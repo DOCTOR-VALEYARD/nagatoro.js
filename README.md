@@ -63,28 +63,20 @@ A **Nagatoro** é uma bot de WhatsApp com personalidade própria: provocadora, s
 **1. Prepare o Termux** (só na primeira vez):
 
 ```bash
-pkg update -y && pkg upgrade -y
-pkg install -y git nodejs-lts ffmpeg python
-pip install -U yt-dlp
-termux-setup-storage
+mkdir -p /data/data/com.termux/cache/apt/archives/partial && pkg update -y && pkg install -y git nodejs-lts ffmpeg python python-pip && pip install -U yt-dlp
 ```
 
-**2. Baixe a Nagatoro e instale:**
+> Se o `pkg` der erro de **Failed to fetch**, rode `termux-change-repo`, escolha **Main repository**, pegue outro servidor e rode o comando de novo.
+
+**2. Instale e ligue a Nagatoro** (um comando só: cria a pasta `nagatoro`, baixa a bot dentro dela e liga; os módulos são instalados sozinhos):
 
 ```bash
-cd ~
-git clone https://github.com/DOCTOR-VALEYARD/nagatoro.js
-cd nagatoro.js
-npm install
+cd ~ && rm -rf nagatoro.js nagatoro && mkdir nagatoro && cd nagatoro && git clone https://github.com/DOCTOR-VALEYARD/nagatoro.js . && npm start
 ```
 
-**3. Ligue a bot:**
+> Os avisos amarelos `npm warn` são normais, não são erro.
 
-```bash
-npm start
-```
-
-**4. Conecte o WhatsApp.** Escolha uma opção no menu que aparece:
+**3. Conecte o WhatsApp.** Escolha uma opção no menu que aparece:
 
 | Opção | Como conectar |
 |:-:|---|
@@ -100,7 +92,7 @@ Pronto. Quando aparecer **"NAGATORO CONECTADA COM SUCESSO"**, é só usar `.menu
 Fechou o Termux? A sessão fica salva. Não precisa baixar de novo nem conectar o WhatsApp outra vez:
 
 ```bash
-cd ~/nagatoro.js && npm start
+cd ~/nagatoro && npm start
 ```
 
 > 💡 Para a bot não cair quando a tela apagar, segure a notificação do Termux e toque em **Acquire wakelock**.
@@ -112,21 +104,13 @@ cd ~/nagatoro.js && npm start
 Quando sair versão nova aqui no repositório, rode:
 
 ```bash
-cd ~/nagatoro.js && git pull --rebase --autostash && npm install && npm start
+cd ~/nagatoro && git pull --rebase --autostash && npm install && npm start
 ```
 
 Isso baixa **só o que mudou**. Sua conexão com o WhatsApp (`auth_info`), suas configurações (`database`) e os dados dos grupos continuam do jeito que estavam.
 
-<details>
-<summary>⚠️ Deu erro no <code>git pull</code>? Clique aqui</summary>
-
-Força a atualização (mantém a conexão do WhatsApp e as configurações feitas pela bot, mas desfaz alterações que você fez à mão nos arquivos):
-
-```bash
-cd ~/nagatoro.js && git fetch origin && git reset --hard origin/main && npm install && npm start
-```
-
-</details>
+> [!IMPORTANT]
+> **Já usava a versão antiga (antes da V5)?** Rode uma vez o comando do passo 2 da instalação: ele apaga a versão antiga e instala a nova. Depois é só conectar o WhatsApp de novo e, daqui pra frente, usar o comando de atualizar acima.
 
 ---
 
@@ -143,7 +127,7 @@ Por esse painel dá para mudar **prefixo, nome do bot, nome e número do dono, f
 Para editar direto no arquivo:
 
 ```bash
-cd ~/nagatoro.js && nano config.js
+cd ~/nagatoro && nano config.js
 ```
 
 | Campo | Para que serve |
@@ -285,7 +269,7 @@ Também dá para subir áudio pelo WhatsApp: `.configurar-bot` → **SUBIR ÁUDI
 <summary><b>Pediu para conectar de novo / sessão inválida</b></summary>
 
 ```bash
-cd ~/nagatoro.js && rm -rf auth_info && npm start
+cd ~/nagatoro && rm -rf auth_info && npm start
 ```
 
 </details>
@@ -294,8 +278,21 @@ cd ~/nagatoro.js && rm -rf auth_info && npm start
 <summary><b>Figurinha de GIF ou vídeo não sai</b></summary>
 
 ```bash
-pkg install -y ffmpeg
+mkdir -p /data/data/com.termux/cache/apt/archives/partial && pkg update -y && pkg install -y ffmpeg
 ```
+
+</details>
+
+<details>
+<summary><b><code>pkg</code> dá "Failed to fetch" / "Could not open file"</b></summary>
+
+A pasta de downloads do Termux foi limpa. Recrie ela e atualize:
+
+```bash
+mkdir -p /data/data/com.termux/cache/apt/archives/partial && pkg update -y
+```
+
+Se continuar, troque o servidor: `termux-change-repo` → **Main repository** → escolha outro espelho.
 
 </details>
 
@@ -303,7 +300,7 @@ pkg install -y ffmpeg
 <summary><b>Música ou vídeo não baixa</b></summary>
 
 ```bash
-pip install -U yt-dlp
+pkg install -y python python-pip && pip install -U yt-dlp
 ```
 
 </details>
@@ -312,7 +309,7 @@ pip install -U yt-dlp
 <summary><b>Erro ao instalar (npm)</b></summary>
 
 ```bash
-cd ~/nagatoro.js && rm -rf node_modules && npm install
+cd ~/nagatoro && rm -rf node_modules && npm install
 ```
 
 </details>
@@ -322,6 +319,12 @@ cd ~/nagatoro.js && rm -rf node_modules && npm install
 ## 👑 Créditos
 
 <div align="center">
+
+<img src="assets/banner-dvcl.png" alt="DOCTOR VALEYARD C'RIZZ LUNÁTICO" width="100%">
+
+<br><br>
+
+<img src="assets/dvcl.png" alt="DVCL" width="260">
 
 Criado por **DOCTOR VALEYARD C'RIZZ LUNÁTICO**
 

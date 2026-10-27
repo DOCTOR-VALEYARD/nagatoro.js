@@ -168,6 +168,8 @@ async function menu(sock, from, opcoes = {}) {
 🧣 ${prefix}ᵐᵉᵐᵉ (busca meme por descrição)
 🧣 ${prefix}ᵗᵒᵐᵖ³
 🧣 ${prefix}ᵍⁱᶠ / ᶠ / ᵗᵒⁱᵐᵍ
+🧣 ${prefix}ˢᶠ (ᶠⁱᵍᵘʳⁱⁿʰᵃ ˢᵉᵐ ᶠᵘⁿᵈᵒ)
+🧣 ${prefix}ᵃᵗᵗᵖ ᵗᵉˣᵗᵒ (ᵃᵗᵗᵖ² ᵃᵗᵉ́ ᵃᵗᵗᵖ⁵)
 🧣 ${prefix}ˢ / ˢᵗⁱᶜᵏᵉʳ / ᶠⁱᵍᵘʳⁱⁿʰᵃ
 🧣 ${prefix}ʳᵒᵘᵇᵃʳ
 🧣 ${prefix}ˢⁱᵍⁿᵒ

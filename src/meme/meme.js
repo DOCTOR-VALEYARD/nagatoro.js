@@ -12,6 +12,7 @@ const { promisify } = require('util');
 const execAsync = promisify(exec);
 const axios = require('axios');
 const config = require('../../config');
+const { semSincroniaTexto } = require('../ffmpeg-compat/ffmpeg-compat');
 
 const dbPath = path.join(__dirname, "../../database/botconfig.json");
 function lerChaves() {
@@ -133,7 +134,7 @@ async function meme(sock, msg, args) {
         await execAsync(
             `ffmpeg -y -threads 0 -i "${tempEntrada}" ` +
             `-t 3 -vf "scale=512:512:force_original_aspect_ratio=increase,crop=512:512:(iw-512)/2:(ih-512)/2,fps=12:round=up" ` +
-            `-c:v libwebp -preset default -compression_level 2 -loop 1 -lossless 0 -quality 80 -an -vsync 0 -f webp "${tempSaida}"`
+            `-c:v libwebp -preset default -compression_level 2 -loop 1 -lossless 0 -quality 80 -an ${semSincroniaTexto()} -f webp "${tempSaida}"`
         );
 
         if (!fs.existsSync(tempSaida) || fs.statSync(tempSaida).size < 512) {

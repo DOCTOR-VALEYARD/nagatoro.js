@@ -117,9 +117,11 @@ async function enviarSoAudio(sock, chatId, nomePasta, { mentions, quoted } = {})
     if (!caminhoOrigem) return false;
     const caminhoTemp = path.join(os.tmpdir(), `voz_${Date.now()}_${Math.floor(Math.random() * 9999)}.ogg`);
     try {
-        await converterParaVoz(caminhoOrigem, caminhoTemp);
+        // .ogg/.opus já estão no formato de voz: manda direto, sem ffmpeg
+        const jaEhVoz = [".ogg", ".opus"].includes(path.extname(caminhoOrigem).toLowerCase());
+        if (!jaEhVoz) await converterParaVoz(caminhoOrigem, caminhoTemp);
         await sock.sendMessage(chatId, {
-            audio: fs.readFileSync(caminhoTemp),
+            audio: fs.readFileSync(jaEhVoz ? caminhoOrigem : caminhoTemp),
             mimetype: "audio/ogg; codecs=opus",
             ptt: true,
             ...(mentions ? { mentions } : {})

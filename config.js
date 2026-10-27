@@ -153,6 +153,10 @@ const config = {
     API_QUALIDADE:
       128,
 
+    // Qualidade do vídeo pela API: 144, 240, 360, 480, 720 ou 1080
+    API_QUALIDADE_VIDEO:
+      360,
+
     // Áudios mais longos que isso (em segundos) NÃO são bloqueados: o bot avisa
     // que pode demorar e baixa mesmo assim (com prazo maior). 1200 = 20 minutos.
     API_MAX_DURACAO:

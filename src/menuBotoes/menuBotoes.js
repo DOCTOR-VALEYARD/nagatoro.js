@@ -203,13 +203,13 @@ function extrairComandosDoBot() {
 }
 
 const CATEGORIAS = {
-  '🎵 MÚSICAS': ['musica-aleatoria','play','dvcl-yt','video','tiktok','instagram','kwai','pinterest','mediafire','gtts','tomp3','voz','esquilo','grave','demonio','robo','eco','nightcore','rapido','lento','radio','s','addfigurinha','gif','toimg','artenome','artenomegif','meme','letra'],
+  '🎵 MÚSICAS': ['musica-aleatoria','play','dvcl-yt','video','tiktok','instagram','kwai','pinterest','mediafire','gtts','tomp3','voz','esquilo','grave','demonio','robo','eco','nightcore','rapido','lento','radio','s','sf','attp','attp2','attp3','attp4','attp5','addfigurinha','gif','toimg','artenome','artenomegif','meme','letra','efeitos','logos','masculino','feminino','crianca','bebe','idoso','gigante','caverna','banheiro','igreja','estadio','tunel','agua','megafone','walkie','telefone','alien','fantasma','bebado','8bit','distorcao','reverso','coral','dueto','vaporwave'],
   '🛠️ FERRAMENTAS': ['calc','calculadora','base64','md5','hashmd5','spoiler','encurtar','encurtador','encurtarlink','qrcode','qr','qr-code','wiki','traduzir','tradutor','celular','tempo','esporte_noticias','me','tang','info','reagir','avalie','bug','sugestao','ping','meuid'],
-  '👤 MEMBROS': ['membros','registrar','delregistro','perfil','inforegistrar','infoperfil','advertidos','mutados','infoadv','infomute','infobot','atividades','resumo','historico','conquistas','botstatus','top10','rankativo','rank','rankinativos','tabela','bot'],
-  '💰 ECONOMIA': ['saldo','moedas','checkin','checkinauto','trabalhar','roubar','transferir','depositar','sacar','extrato','inventario','bonus','premio','xp','nivel','loja','duelo','resgatar','token','gastar','topgold','topxp','topamizade','topcasais','casal','amizade','compatibilidade','dupla','familia','familias','casamento','meucasal','divorcio','presente','presentes','missoes','missao'],
-  '🎮 BRINCADEIRAS': ['forca','adivinha','quiz','jogodavelha','aleatory','roleta','sortear','signo','simi','enquete','tapa','matar','beijar','abracar','amizade','compatibilidade','dupla','casal','familia','familias','casamento','meucasal','divorcio','topcasais'],
-  '🛡️ ADMIN': ['mute','unmute','warn','unwarn','autoban','marcar','hidetag','citar','regras','grupo','convite','promover','rebaixar','antilink','antinota','antiloc','antidoc','fixar','antinudes','antifake','ban','kick','abrir','fechar','aviso','bemvindo','sair','saudacao','antiamor','aceitar','mencao','adms','cagueta','antipalavrao','dvcl-antipalavrao','antispam','antiflood','somenteadm','statusadm','dvcl-auto','dvcl1','dvcl0','lista','listra','blacklist','dvcl-lista','tirarlista','removerlista','delblacklist','add','nagatoro-add','modulos','limparbot','logban','historico-ban','relatorio','relatoriodiario','manutencao'],
-  '👑 DONO': ['ligar','desligar','restart','broadcast','boot','backup','configaniversario','configaniversario-reset']
+  '👤 MEMBROS': ['membros','registrar','delregistro','perfil','inforegistrar','infoperfil','advertidos','mutados','infoadv','infomute','infobot','atividades','resumo','historico','conquistas','botstatus','top10','rankativo','rank','rankinativos','tabela','bot','dono','menumidias','menugold','menuadm','menudono'],
+  '💰 ECONOMIA': ['gold','daily','caca','saldo','moedas','checkin','checkinauto','trabalhar','roubar','transferir','depositar','sacar','extrato','inventario','bonus','premio','xp','nivel','loja','duelo','resgatar','token','gastar','topgold','topxp','topamizade','topcasais','casal','amizade','compatibilidade','dupla','familia','familias','casamento','meucasal','divorcio','presente','presentes','missoes','missao'],
+  '🎮 BRINCADEIRAS': ['brincadeiras','forca','adivinha','quiz','jogodavelha','aleatory','roleta','sortear','signo','simi','chute','spam','enquete','tapa','matar','beijar','abracar','amizade','compatibilidade','dupla','casal','familia','familias','casamento','meucasal','divorcio','topcasais'],
+  '🛡️ ADMIN': ['mute','unmute','warn','unwarn','autoban','marcar','hidetag','citar','regras','grupo','convite','promover','rebaixar','antilink','antinota','antiloc','antidoc','fixar','antinudes','antifake','ban','kick','abrir','fechar','aviso','bemvindo','sair','saudacao','antiamor','aceitar','mencao','adms','cagueta','x9','antinsfw','ia','level','reacao','saidas','limpar','antipalavrao','dvcl-antipalavrao','antispam','antiflood','somenteadm','statusadm','dvcl-auto','dvcl1','dvcl0','lista','listra','blacklist','dvcl-lista','tirarlista','removerlista','delblacklist','add','nagatoro-add','modulos','limparbot','logban','historico-ban','relatorio','relatoriodiario','manutencao'],
+  '👑 DONO': ['ativar','configurar-bot','ligar','desligar','restart','broadcast','boot','backup','configaniversario','configaniversario-reset']
 };
 
 const SUBCATEGORIAS = {
@@ -370,7 +370,38 @@ function descricaoComando(command) {
     calc: 'Fazer cálculos.',
     tempo: 'Consultar o clima.',
     ping: 'Verificar resposta do bot.',
-    configurar: 'Abrir configuração do bot.'
+    configurar: 'Abrir configuração do bot.',
+    sf: 'Figurinha sem fundo (apaga fundo preto/branco).',
+    attp: 'Texto vira figurinha piscando (cores sorteadas).',
+    attp2: 'Texto em figurinha arco-íris.',
+    attp3: 'Texto em figurinha neon pulsante.',
+    attp4: 'Texto em figurinha digitando.',
+    attp5: 'Texto em figurinha onda.',
+    toimg: 'Figurinha vira imagem.',
+    addfigurinha: 'Salvar figurinha com um nome.',
+    efeitos: 'Efeitos em foto.',
+    logos: 'Criar logo com seu texto.',
+    x9: 'Liga/desliga o X9 (mostra o que apagarem).',
+    antinsfw: 'Liga/desliga o anti-pornografia.',
+    ia: 'Liga/desliga a IA da Nagatoro no chat.',
+    level: 'Liga/desliga o sistema de level.',
+    reacao: 'Liga/desliga reação automática.',
+    saidas: 'Histórico de quem saiu do grupo.',
+    limpar: 'Apaga a mensagem marcada.',
+    cagueta: 'Avisa quem ganhou/perdeu ADM.',
+    dono: 'Contato do dono da bot.',
+    chute: 'Chutar alguém (GIF).',
+    spam: 'Repetir uma mensagem.',
+    gold: 'Ver seu gold.',
+    daily: 'Pegar o prêmio diário.',
+    bot: 'Chamar a Nagatoro.',
+    ativar: 'Painel de resposta a xingamentos.',
+    'configurar-bot': 'Painel de configuração.',
+    menumidias: 'Menu de mídias.',
+    menugold: 'Menu de economia.',
+    menuadm: 'Menu de ADM.',
+    menudono: 'Menu do dono.',
+    brincadeiras: 'Menu de brincadeiras.'
   };
   return mapa[command] || `Executar ${config.PREFIX}${command}`;
 }
@@ -461,7 +492,7 @@ function comandoPrecisaEntrada(command) {
     'calc','calculadora','base64','md5','hashmd5','spoiler','encurtar','encurtador','encurtarlink','qrcode','qr','qr-code',
     'roubar','transferir','depositar','sacar','presente','resgatar','token','gastar','warn','unwarn','mute','unmute',
     'autoban','configaniversario','manutencao','broadcast','spam','add','dvcl-prt','dvcl-ptr','caca','caça','tang',
-    'quando','chance','vab','adivinharnmr','configurar-bot','letra','simi','matar','tapa','beijar','abracar','chute'
+    'quando','chance','vab','adivinharnmr','configurar-bot','letra','simi','attp','attp2','attp3','attp4','attp5','matar','tapa','beijar','abracar','chute'
   ]).has(c);
 }
 
@@ -471,6 +502,7 @@ function textoPrompt(command) {
   if (['play','musica'].includes(c)) return '🎵 Qual música você deseja baixar?\n\nDigite somente o nome da música.';
   if (['video','baixarvideo'].includes(c)) return '🎬 Qual vídeo você deseja baixar?\n\nDigite o nome ou envie o link.';
   if (['tiktok','instagram','kwai','pinterest','mediafire','media-fire'].includes(c)) return `🔗 Envie o link para *${c}*.`;
+  if (/^attp\d?$/.test(c)) return '✍️ Manda o texto da figurinha, senpai. Ex.: *Nagatoro*';
   if (c === 'letra') return '🎤 Qual música? Use *artista - música*.\n\nEx.: *legião urbana - tempo perdido*';
   if (c === 'simi') return '🔮 Faz a pergunta pro oráculo, senpai.';
   if (c === 'configurar-bot') return '⚙️ Envie a configuração que deseja alterar. Ex.: *prefixo !*';

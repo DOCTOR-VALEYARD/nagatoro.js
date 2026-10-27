@@ -1,6 +1,5 @@
 # 📦 dependências (instaladas com npm install)
 node_modules/
-package-lock.json
 
 # 🔐 sessão do WhatsApp — NUNCA suba isso
 auth_info/

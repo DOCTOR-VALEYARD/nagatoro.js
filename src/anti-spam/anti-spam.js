@@ -84,7 +84,7 @@ async function reagir(sock, msg) {
 function iniciarAmpulheta(sock, chat, msg) {
     const inicio = Date.now();
     let promessa = null;
-    try { promessa = sock.sendMessage(chat, { text: "⏳" }, { quoted: msg }); } catch { promessa = null; }
+    try { promessa = sock.sendMessage(chat, { text: "⏳" }); /* sem citar: citar apagava a marcação da mensagem do comando */ } catch { promessa = null; }
     return {
         async finalizar() {
             try {

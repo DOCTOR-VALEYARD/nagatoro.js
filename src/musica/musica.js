@@ -61,7 +61,7 @@ const { enviarCardOuAnimado } =
 const { buscarFotoContexto } =
     require('../foto-contexto/foto-contexto');
 
-const { baixarAudioApi } =
+const { baixarAudioApi, baixarVideoApi, extrairIdYoutube } =
     require('../ytapi/ytapi');
 
 // youtubei.js é usado somente para pesquisar. O yt-dlp continua sendo o
@@ -193,7 +193,7 @@ try {
 } catch {}
 
 // Já começa a baixar quando o bot liga (não trava nada se falhar).
-garantirYtDlp().catch(() => {});
+if (config.MUSICA?.USAR_API === false) garantirYtDlp().catch(() => {});
 
 function comandoBase() {
 
@@ -1015,24 +1015,62 @@ async function pesquisarResultadoYtDlp(busca, limite = 5) {
     return { ...candidatos[0], candidatos };
 }
 
+// Link do YouTube → dados do vídeo SEM yt-dlp (youtubei.js; se falhar, segue só com o ID).
+async function resolverLinkYoutube(busca) {
+    const link = busca.match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[),.;]+$/, "") || busca;
+    const id = extrairIdYoutube(link);
+    if (!id) throw new Error('Por enquanto o /play só aceita link do YouTube ou o nome da música.');
+    let titulo = 'Vídeo do YouTube', autor = '—', duracao = 0, views = 0, capa = null;
+    try {
+        const yt = await obterYoutubei();
+        const info = await Promise.race([
+            yt.getBasicInfo(id),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('demorou')), 12000))
+        ]);
+        const b = info?.basic_info || {};
+        titulo = b.title || titulo;
+        autor = b.author || b.channel?.name || autor;
+        duracao = Number(b.duration || 0);
+        views = Number(b.view_count || 0);
+        capa = b.thumbnail?.[0]?.url || null;
+    } catch (e) { console.log('🔎 [youtubei.js] Não consegui os detalhes do link, seguindo só com o ID:', e.message); }
+    const item = {
+        id, webpage_url: `https://www.youtube.com/watch?v=${id}`, title: titulo,
+        uploader: autor, channel: autor, duration: duracao, view_count: views,
+        thumbnail: capa || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        upload_date: null, timestamp: null
+    };
+    return { ...item, candidatos: [item] };
+}
+
 async function pesquisarResultado(busca, limite = 5) {
+    const apiLigada = config.MUSICA?.USAR_API !== false;
+    // Link do YouTube: com a API ligada, resolve sem yt-dlp. Links de outros sites (TikTok, Instagram, Kwai...) seguem o fluxo antigo.
+    if (apiLigada && extrairIdYoutube(busca.match(/https?:\/\/[^\s]+/i)?.[0] || '')) return resolverLinkYoutube(busca);
     // URLs já informadas continuam sendo resolvidas pelo fluxo original.
     if (!/https?:\/\/[^\s]+/i.test(busca)) {
-        try {
-            const resultado = await Promise.race([
-                pesquisarResultadoYoutubei(busca, limite),
-                new Promise((_, rejeitar) => setTimeout(
-                    () => rejeitar(new Error('youtubei.js demorou demais.')),
-                    12000
-                ))
-            ]);
-            console.log('🔎 [youtubei.js] Busca concluída.');
-            return resultado;
-        } catch (erroYoutubei) {
-            console.log(`🔎 [youtubei.js] Falhou, usando yt-dlp: ${erroYoutubei.message}`);
+        const tentativas = apiLigada ? 2 : 1;
+        for (let i = 1; i <= tentativas; i++) {
+            try {
+                const resultado = await Promise.race([
+                    pesquisarResultadoYoutubei(busca, limite),
+                    new Promise((_, rejeitar) => setTimeout(
+                        () => rejeitar(new Error('youtubei.js demorou demais.')),
+                        12000
+                    ))
+                ]);
+                console.log('🔎 [youtubei.js] Busca concluída.');
+                return resultado;
+            } catch (erroYoutubei) {
+                console.log(`🔎 [youtubei.js] Falhou (${i}/${tentativas}): ${erroYoutubei.message}`);
+                youtubeiInstanciaPromise = null; // recria a sessão na próxima tentativa
+            }
         }
     }
 
+    if (config.MUSICA?.USAR_API !== false && !/https?:\/\/[^\s]+/i.test(busca)) {
+        throw new Error('Não consegui pesquisar agora. Tente de novo em instantes.');
+    }
     return pesquisarResultadoYtDlp(busca, limite);
 }
 
@@ -1882,8 +1920,10 @@ async function baixarResultadoPlay(sock, msg, token, modo, opcoes = {}) {
             return null;
         };
 
-        // ---------- API (só áudio) ----------
-        const usarApi = ehAudio && config.MUSICA?.USAR_API !== false;
+        // ---------- API (áudio e vídeo) ----------
+        // áudio E vídeo do YouTube pela API; links de outros sites seguem pelo yt-dlp
+        const usarApi = config.MUSICA?.USAR_API !== false
+            && !!extrairIdYoutube(info.webpage_url || info.url || resultado.url || '');
 
         let avisouLongo = false;
         const rodarApi = async (tmpl, ctl) => {
@@ -1908,7 +1948,9 @@ async function baixarResultadoPlay(sock, msg, token, modo, opcoes = {}) {
                     } catch {}
                 }
                 try {
-                    const via = await baixarAudioApi(linkApi, tmpl, { qualidade: config.MUSICA?.API_QUALIDADE || 128, longo });
+                    const via = ehAudio
+                        ? await baixarAudioApi(linkApi, tmpl, { qualidade: config.MUSICA?.API_QUALIDADE || 128, longo })
+                        : await baixarVideoApi(linkApi, tmpl, { qualidade: config.MUSICA?.API_QUALIDADE_VIDEO || 360, longo: true });
                     const achado = encontrarArquivo(tmpl, modo);
                     if (!achado) throw new Error("O download pela API terminou, mas o arquivo não foi encontrado.");
                     return { arquivo: achado, titulo: via.titulo || null, alvo: alvoApi, origem: 'api' };
@@ -1936,7 +1978,7 @@ async function baixarResultadoPlay(sock, msg, token, modo, opcoes = {}) {
         };
 
         if (usarApi) {
-            // 🎵 ÁUDIO / DOCUMENTO: SÓ pela API (sem yt-dlp). As APIs têm
+            // 🎵 ÁUDIO / VÍDEO / DOCUMENTO: SÓ pela API (sem yt-dlp). As APIs têm
             // tempo de sobra e tentam de novo antes de desistir (ver ytapi.js).
             const r = await rodarApi(template, { cancelado: false });
             if (r) {

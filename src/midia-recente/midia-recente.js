@@ -95,14 +95,17 @@ async function pegarMidia(sock, msg) {
 
     // 2) mídia marcada (resposta)
     const ctx = acharContexto(msg.message);
-    const citada = ctx?.quotedMessage;
-    const marcada = citada && acharMidia(citada, 0, false); // a cópia marcada pode vir sem a chave do arquivo
+    if (!ctx) return null;
+    const citada = ctx.quotedMessage;
+    // a original guardada (pelo "número" da mensagem marcada) resolve até quando o
+    // WhatsApp manda a marcação SEM o conteúdo do vídeo/foto
+    const original = ctx.stanzaId && recentes.get(ctx.stanzaId);
+    const marcada = (citada && acharMidia(citada, 0, false)) || (original && acharMidia(original.message));
     if (!marcada) return null;
 
     const tentativas = [];
-    const original = ctx.stanzaId && recentes.get(ctx.stanzaId);
     if (original) tentativas.push(original);
-    tentativas.push({
+    if (citada) tentativas.push({
         key: { remoteJid: from, id: ctx.stanzaId || "x", participant: ctx.participant, fromMe: false },
         message: citada
     });
@@ -121,7 +124,7 @@ async function pegarMidia(sock, msg) {
 function acharContexto(message, profundidade = 0) {
     if (!message || typeof message !== "object" || profundidade > 6) return null;
     for (const valor of Object.values(message)) {
-        if (valor && typeof valor === "object" && valor.contextInfo?.quotedMessage) return valor.contextInfo;
+        if (valor && typeof valor === "object" && (valor.contextInfo?.quotedMessage || valor.contextInfo?.stanzaId)) return valor.contextInfo;
     }
     for (const [chave, valor] of Object.entries(message)) {
         if (chave === "contextInfo" || !valor || typeof valor !== "object" || Buffer.isBuffer(valor)) continue;
@@ -134,7 +137,10 @@ function acharContexto(message, profundidade = 0) {
 function temMidia(msg) {
     if (acharMidia(msg?.message)) return true;
     const ctx = acharContexto(msg?.message);
-    return !!(ctx?.quotedMessage && acharMidia(ctx.quotedMessage, 0, false));
+    if (!ctx) return false;
+    if (ctx.quotedMessage && acharMidia(ctx.quotedMessage, 0, false)) return true;
+    const original = ctx.stanzaId && recentes.get(ctx.stanzaId);
+    return !!(original && acharMidia(original.message));
 }
 
 module.exports = { instalar, guardar, pegarMidia, acharMidia, acharContexto, temMidia };

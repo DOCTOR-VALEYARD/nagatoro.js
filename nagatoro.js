@@ -1,47 +1,8 @@
 // ==================================================
-// 🛡️ GUARDIÃO — A NAGATORO NÃO FICA CAÍDA
+// 🛡️ ERROS CONTIDOS (igual à Mikasa): erro em um comando não derruba a bot
 // ==================================================
-// Quando você roda "node nagatoro.js" (ou npm start), este processo vira
-// só o GUARDIÃO: ele liga a Nagatoro num processo filho e, se ela parar
-// por QUALQUER motivo (erro, hospedagem matando o processo depois de
-// trocar o prefixo/configuração, falta de memória...), religa sozinha em
-// 2 segundos — sem precisar ir na hospedagem apertar "iniciar".
-// O botão de PARAR da hospedagem continua funcionando normalmente.
-// (Cópias do painel do Telegram não usam o guardião: o painel cuida delas.)
-if (!process.env.NAGATORO_FILHO && !process.env.PAINEL_NUMERO && !process.env.NAGATORO_SEM_GUARDIAO) {
-    const { spawn } = require("child_process");
-    let filhoAtual = null, encerrando = false, quedas = [], timerReligar = null;
-    const iniciarFilho = () => {
-        timerReligar = null;
-        if (encerrando) return process.exit(0);
-        filhoAtual = spawn(process.execPath, [...process.execArgv, __filename, ...process.argv.slice(2)], {
-            stdio: "inherit",
-            env: { ...process.env, NAGATORO_FILHO: "1" }
-        });
-        filhoAtual.on("exit", (codigo, sinal) => {
-            filhoAtual = null;
-            if (encerrando) return process.exit(codigo ?? 0);
-            const agora = Date.now();
-            quedas = quedas.filter(t => agora - t < 60000);
-            quedas.push(agora);
-            // caiu 5 vezes em 1 minuto? espera mais um pouco pra não ficar em loop
-            const espera = quedas.length >= 5 ? 30000 : 2000;
-            console.log(`\n♻️ A Nagatoro parou (${sinal || "código " + codigo}). Religando sozinha em ${espera / 1000}s...\n`);
-            timerReligar = setTimeout(iniciarFilho, espera);
-        });
-    };
-    for (const sinal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
-        process.on(sinal, () => {
-            encerrando = true;
-            if (timerReligar) clearTimeout(timerReligar);
-            if (!filhoAtual) return process.exit(0);           // estava esperando pra religar: só para
-            try { filhoAtual.kill(sinal); } catch {}
-            setTimeout(() => { try { filhoAtual?.kill("SIGKILL"); } catch {} process.exit(0); }, 5000); // não travou parando
-        });
-    }
-    iniciarFilho();
-    return; // o guardião não roda o bot; quem roda é o filho
-}
+process.on("uncaughtException", e => console.error("⚠️ [erro contido]", e));
+process.on("unhandledRejection", e => console.error("⚠️ [promessa contida]", e));
 
 // ==================================================
 // 📦 VERIFICAÇÃO BÁSICA DAS BIBLIOTECAS
@@ -50,17 +11,11 @@ const fs = require("fs");
 
 const { execSync } = require("child_process");
 
-// Se alguma biblioteca estiver faltando (ex.: a hospedagem não rodou o npm install),
-// instala sozinha antes de começar — inclusive as das figurinhas e dos cards.
 const dependencias = [
     "@whiskeysockets/baileys",
     "pino",
     "qrcode-terminal",
-    "chalk",
-    "node-cache",
-    "node-webpmux",
-    "@napi-rs/canvas",
-    "axios"
+    "chalk"
 ];
 
 console.log("🔍 VERIFICANDO BIBLIOTECAS...");
@@ -68,10 +23,10 @@ dependencias.forEach(pacote => {
     try { require.resolve(pacote); }
     catch {
         console.log(`📥 INSTALANDO: ${pacote}`);
-        try { execSync(`npm install ${pacote} --save --allow-git=all`, { stdio: "inherit" }); }
-        catch (e) { console.error(`⚠️ Não consegui instalar ${pacote}:`, e?.message || e); }
+        execSync(`npm install ${pacote} --save`, { stdio: "inherit" });
     }
 });
+try { console.log(`📦 BAILEYS EM USO: ${require("@whiskeysockets/baileys/package.json").version}`); } catch { try { console.log(`📦 BAILEYS EM USO: ${JSON.parse(fs.readFileSync(require("path").join(__dirname, "node_modules/@whiskeysockets/baileys/package.json"), "utf8")).version}`); } catch {} }
 const NodeCache = require("node-cache");
 
 // --- DEPENDÊNCIAS DO BOT ---
@@ -340,7 +295,7 @@ async function startNagatoro(modo = "qrcode", numeroCelular = "") {
     // ✅ CONFIG LIMPA — SEM mobile NEM phoneNumber (não existem no v7-rc9)
     const sock = makeWASocket({
         version,
-        logger: pino({ level: "silent" }),
+        logger: pino({ level: "error" }), // 🔎 mostra no console se alguma mensagem falhar ao abrir (descriptografar)
         auth: state,
         markOnlineOnConnect: true,
         printQRInTerminal: false,
@@ -350,8 +305,8 @@ async function startNagatoro(modo = "qrcode", numeroCelular = "") {
     // 🤖 Anota tudo que o bot envia (pra não confundir eco com mensagem de outro bot)
     antiBot.instalarRastreio(sock);
 
-    // 📦 Guarda as mídias que o bot envia (pra figurinha/gif de mídia marcada sempre achar o arquivo)
-    try { require("./src/midia-recente/midia-recente").instalar(sock); } catch (e) { console.error("midia-recente:", e.message); }
+    // 🧷 Guarda o que o bot envia (pra quem RESPONDER a mensagem dele, a marcação sempre funcionar)
+    try { require("./src/marcacao/marcacao").instalar(sock); } catch (e) { console.error("marcacao:", e.message); }
 
     // ᴀ ʟᴇᴛʀɪɴʜᴀꜱ: tira as caixinhas e põe letras pequeninhas em tudo que o bot envia
     try { require("./src/estilo-texto/estilo-texto").instalar(sock); } catch (e) { console.error("estilo-texto:", e.message); }
@@ -484,7 +439,19 @@ function anexarEventosBot(sock, saveCreds) {
     // ==================================================
     // 💬 PROCESSAMENTO DE MENSAGENS — TUDO ORIGINAL
     // ==================================================
-    sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    sock.ev.on("messages.upsert", async ({ messages, type, requestId }) => {
+        // 🔎 DIAGNÓSTICO NO CONSOLE: de onde a mensagem veio e se a marcação veio junto
+        try {
+            for (const m of messages || []) {
+                const t = m?.message?.conversation || m?.message?.extendedTextMessage?.text || m?.message?.imageMessage?.caption || "";
+                if (!String(t).trim().startsWith(config.PREFIX) && !m?.messageStubType) continue;
+                const c = m?.message?.extendedTextMessage?.contextInfo;
+                console.log(`🔎 MSG tipo=${type} reenviadaPeloCelular=${requestId ? "SIM" : "nao"} stub=${m?.messageStubType || "-"} ${JSON.stringify(m?.messageStubParameters || [])} marcacao=${c ? (c.stanzaId ? "SIM" : "sem-id") : "NAO"} texto=${String(t).slice(0, 20)}`);
+            }
+        } catch {}
+
+        // 🧷 guarda TODA mensagem que chega (pra completar a marcação quando alguém responder ela)
+        try { const marcacao = require("./src/marcacao/marcacao"); for (const m of messages || []) marcacao.guardar(m); } catch {}
 
         if (type !== "notify") return;
 
@@ -492,8 +459,8 @@ function anexarEventosBot(sock, saveCreds) {
 
         if (!msg.message) return;
 
-        // 📦 guarda a mídia (se tiver) pra quem responder ela depois com .s / .gif
-        try { require("./src/midia-recente/midia-recente").guardar(msg); } catch {}
+        // 🧷 arruma a marcação (responder mensagem) antes de qualquer comando ler
+        try { require("./src/marcacao/marcacao").normalizar(msg); } catch {}
 
         const from = msg.key.remoteJid;
         const isGroup = from.endsWith("@g.us");
@@ -512,6 +479,14 @@ function anexarEventosBot(sock, saveCreds) {
             // 🤖 Outro bot no grupo (mesmo prefixo, respondendo junto): ignora por completo.
             const donoDaMsg = ehDono([msg.key.participant, msg.key.participantAlt], config.OWNER_NUMBER);
             if (antiBot.ehOutroBot(msg, donoDaMsg)) return;
+
+            // 🔐 Alguém (que não é o dono) marcou o dono no grupo: aviso de acesso restrito.
+            try {
+                const marcados = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+                if (!donoDaMsg && !msg.key.fromMe && marcados.length && marcados.some(j => ehDono([j], config.OWNER_NUMBER))) {
+                    require("./src/dono/dono").responderDono(sock, from, msg).catch(() => {});
+                }
+            } catch {}
         }
 
         // 📢 STATUS: uma marcação de grupo chega em status@broadcast, não em @g.us.
@@ -1124,6 +1099,8 @@ const { estaAtiva: brincadeirasAtivas, alterarAtivacao: alterarBrincadeiras, ehB
 🧣 ${config.PREFIX}tomp3
 🧣 ${config.PREFIX}gif / f / toimg
 🧣 ${config.PREFIX}s / sticker / figurinha
+🧣 ${config.PREFIX}sf (figurinha sem fundo)
+🧣 ${config.PREFIX}attp texto (também attp2, attp3, attp4, attp5)
 🧣 ${config.PREFIX}roubar
 🧣 ${config.PREFIX}signo
 🧣 ${config.PREFIX}casal
@@ -1270,6 +1247,8 @@ const { estaAtiva: brincadeirasAtivas, alterarAtivacao: alterarBrincadeiras, ehB
                 case "voz": case "efeitovoz": case "masculino": case "feminino": case "crianca": case "bebe": case "idoso": case "gigante": case "esquilo": case "grave": case "demonio": case "caverna": case "banheiro": case "igreja": case "estadio": case "tunel": case "agua": case "megafone": case "walkie": case "telefone": case "eco": case "radio": case "alien": case "fantasma": case "bebado": case "8bit": case "distorcao": case "reverso": case "coral": case "dueto": case "robo": case "vaporwave": case "nightcore": case "rapido": case "lento": return voz(sock, msg, command, args);
                 case "tomp3": return tomp3(sock, msg, args);
                 case "s": case "sticker": case "figurinha": return criarFigurinha(sock, msg);
+                case "sf": case "semfundo": case "sfundo": return require("./src/semfundo/semfundo").semFundo(sock, msg, args);
+                case "attp": case "attp2": case "attp3": case "attp4": case "attp5": return require("./src/attp/attp")[command](sock, msg, args);
                 case "addfigurinha": case "nagatoro-fig": return addfigurinha(sock, msg, args);
                 case "gif": case "f": return converterParaGif(sock, msg, "gif");
                 case "toimg": return converterParaGif(sock, msg, "imagem");
@@ -1397,6 +1376,7 @@ const { estaAtiva: brincadeirasAtivas, alterarAtivacao: alterarBrincadeiras, ehB
                 case "letra": return letra(sock, msg, args);
                 case "simi": case "oraculo": return simi(sock, msg, args);
                 case "info": return grupoHandler(sock, msg, "info", args);
+                case "dono": case "criador": return require("./src/dono/dono").responderDono(sock, from, msg);
             }
             })(); } finally { if (_ampulheta) await _ampulheta.finalizar(); }
 

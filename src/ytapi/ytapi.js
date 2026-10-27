@@ -1,5 +1,5 @@
 /* =================================================
-   🎵 NAGATORO — YTAPI
+   🎵 ZARA BOT — YTAPI
    📁 src/ytapi.js
    👑 DOCTOR VALEYARD
 
@@ -22,6 +22,7 @@ const fs = require('fs');
 const { createDecipheriv } = require('crypto');
 
 const QUALIDADES_AUDIO = [92, 128, 256, 320];
+const QUALIDADES_VIDEO = [144, 240, 360, 480, 720, 1080];
 
 const UA_MOBILE =
     'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 ' +
@@ -90,7 +91,8 @@ function extrairIdYoutube(entrada) {
     return /^[A-Za-z0-9_-]{11}$/.test(texto) ? texto : null;
 }
 
-function escolherQualidade(q) {
+function escolherQualidade(q, tipo = 'audio') {
+    if (tipo === 'video') return QUALIDADES_VIDEO.includes(Number(q)) ? Number(q) : 360;
     return QUALIDADES_AUDIO.includes(Number(q)) ? Number(q) : 128;
 }
 
@@ -112,7 +114,7 @@ function motivoDoErro(erro) {
 // 1️⃣ SAVETUBE → devolve { url, titulo }
 // =================================================
 
-async function obterLinkSavetube(videoUrl, qualidade) {
+async function obterLinkSavetube(videoUrl, qualidade, tipo = 'audio') {
     const cdn = (await axios.get('https://media.savetube.vip/api/random-cdn', {
         timeout: TIMEOUT_INFO,
         headers: { 'User-Agent': UA_MOBILE }
@@ -133,7 +135,7 @@ async function obterLinkSavetube(videoUrl, qualidade) {
     if (!detalhes?.key) throw new Error('Savetube não retornou a chave de download.');
 
     const resposta = (await axios.post(`https://${cdn}/download`, {
-        downloadType: 'audio',
+        downloadType: tipo === 'video' ? 'video' : 'audio',
         quality: String(qualidade),
         key: detalhes.key
     }, {
@@ -170,9 +172,9 @@ function acharUrlNaResposta(r) {
     return candidatos.find(v => typeof v === 'string' && /^https?:\/\//i.test(v)) || null;
 }
 
-async function obterLinkVreden(videoUrl, qualidade) {
+async function obterLinkVreden(videoUrl, qualidade, tipo = 'audio') {
     const resposta = await axios.get(
-        'https://api.vreden.my.id/api/v1/download/youtube/audio',
+        `https://api.vreden.my.id/api/v1/download/youtube/${tipo === 'video' ? 'video' : 'audio'}`,
         {
             timeout: TIMEOUT_INFO,
             params: { url: videoUrl, quality: qualidade },
@@ -210,12 +212,12 @@ async function baixarParaArquivo(url, destino, longo = false) {
 
     const tipo = String(resposta.headers?.['content-type'] || '').toLowerCase();
     if (tipo.includes('text/html') || tipo.includes('application/json')) {
-        throw new Error(`O link devolveu "${tipo}" em vez de áudio.`);
+        throw new Error(`O link devolveu "${tipo}" em vez de mídia.`);
     }
 
     const buffer = Buffer.from(resposta.data);
     if (buffer.length < 10000) {
-        throw new Error('O áudio baixado veio vazio ou incompleto.');
+        throw new Error('O arquivo baixado veio vazio ou incompleto.');
     }
 
     fs.writeFileSync(destino, buffer);
@@ -229,13 +231,14 @@ async function baixarParaArquivo(url, destino, longo = false) {
 //   → { arquivo, titulo, provedor }   (sucesso)
 //   → lança Error com o motivo de cada provedor (falha total)
 
-async function baixarAudioApi(videoUrlOuId, destinoSemExtensao, opcoes = {}) {
+async function baixarMidiaApi(videoUrlOuId, destinoSemExtensao, opcoes = {}) {
+    const tipo = opcoes.tipo === 'video' ? 'video' : 'audio';
     const id = extrairIdYoutube(videoUrlOuId);
     if (!id) throw new Error('Link do YouTube inválido para a API.');
 
     const videoUrl = `https://www.youtube.com/watch?v=${id}`;
-    const qualidade = escolherQualidade(opcoes.qualidade);
-    const destino = `${destinoSemExtensao}.mp3`;
+    const qualidade = escolherQualidade(opcoes.qualidade, tipo);
+    const destino = `${destinoSemExtensao}.${tipo === 'video' ? 'mp4' : 'mp3'}`;
 
     const provedores = [
         { nome: 'Savetube', obter: obterLinkSavetube },
@@ -253,7 +256,7 @@ async function baixarAudioApi(videoUrlOuId, destinoSemExtensao, opcoes = {}) {
         for (let tentativa = 1; tentativa <= TENTATIVAS_POR_PROVEDOR; tentativa++) {
             try {
                 console.log(`🎵 [YTAPI] Tentando ${p.nome}${tentativa > 1 ? ` (tentativa ${tentativa})` : ''}...`);
-                const { url, titulo } = await comPrazo(p.obter(videoUrl, qualidade), opcoes.longo ? PRAZO_LINK_LONGO_MS : PRAZO_LINK_MS, p.nome);
+                const { url, titulo } = await comPrazo(p.obter(videoUrl, qualidade, tipo), opcoes.longo ? PRAZO_LINK_LONGO_MS : PRAZO_LINK_MS, p.nome);
                 const bytes = await baixarParaArquivo(url, destino, !!opcoes.longo);
                 console.log(`🎵 [YTAPI] ✅ ${p.nome} entregou ${(bytes / 1024 / 1024).toFixed(2)} MB`);
                 return { arquivo: destino, titulo, provedor: p.nome };
@@ -276,7 +279,10 @@ async function baixarAudioApi(videoUrlOuId, destinoSemExtensao, opcoes = {}) {
         }
     }
 
-    throw new Error(`API de áudio indisponível (${falhas.join(' | ')})`);
+    throw new Error(`API de ${tipo === 'video' ? 'vídeo' : 'áudio'} indisponível (${falhas.join(' | ')})`);
 }
 
-module.exports = { baixarAudioApi, extrairIdYoutube };
+const baixarAudioApi = (v, d, o = {}) => baixarMidiaApi(v, d, { ...o, tipo: 'audio' });
+const baixarVideoApi = (v, d, o = {}) => baixarMidiaApi(v, d, { ...o, tipo: 'video' });
+
+module.exports = { baixarAudioApi, baixarVideoApi, baixarMidiaApi, extrairIdYoutube };

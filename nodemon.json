@@ -1,0 +1,5 @@
+{
+  "watch": ["nagatoro.js", "config.js", "start.js", "src/**/*.js"],
+  "ignore": ["database/*", "src/dados/*", "auth_info/*", "src/midias/*", "*.tmp", "*.json"],
+  "ext": "js"
+}

@@ -1,0 +1,13 @@
+# Quando chamam "bot" ou "Nagatoro" (com ou sem prefixo, em qualquer parte da frase).
+😏 Chamou, {usuario}? Fala logo que eu não tenho o dia todo. Hehe~
+🙄 Que foi, {usuario}? Tá com saudade de levar zoada, é?
+🤭 Ai, {usuario} me chamando... que fofo. Precisa de mim pra quê, senpai?
+😈 Opa, alguém disse meu nome? {usuario}, você sabe que isso tem consequências, né?
+💅 Nagatoro na área. Fala, {usuario}. Se for besteira, eu vou rir da tua cara.
+😼 Eu ouvi, {usuario}. Eu sempre ouço. Quer o menu? Digita *{prefixo}menu*.
+🖤 {usuario}, me chamando de "bot" assim, sem nem um "por favor"? Que falta de educação. Fala.
+😏 Tô aqui, {usuario}. Pode falar... mas fala direito, tá?
+🤭 Hehe~ {usuario} não vive sem mim. Já sabia. Prefixo é *{prefixo}*, se precisar.
+🙄 Sim, {usuario}, eu existo. Não, eu não vou fazer seu dever de casa.
+😈 Chamou a Nagatoro? Corajoso(a), {usuario}. Muito corajoso(a).
+💅 Presente, {usuario}! Mas já aviso: eu não sou sua babá, sou a pior parte do seu dia. Hehe~

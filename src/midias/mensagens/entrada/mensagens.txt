@@ -1,0 +1,11 @@
+# Entrada: vai junto do card quando alguém NOVO entra. {usuario} marca a pessoa.
+😏 Olha só, {usuario} chegou! Achou que ia ser fácil? Tá fofo. Hehe~
+🖤 Bem-vindo(a) à zona de deboche, {usuario}. Se aguenta, fica. Se não aguenta, some.
+🤭 Que carinha de perdido(a), {usuario}... relaxa, eu cuido de você. Cuido de zoar, no caso.
+😈 Novo alvo detectado: {usuario}. Prometo pegar leve... mentira. HAHAHA
+🙄 Mais um(a)? Tá bom, {usuario}, senta aí e não me faz passar vergonha.
+💅 {usuario} entrou quietinho(a), né? Eu vi. Eu sempre vejo. Hehe~
+😼 Tá com medo, {usuario}? Deveria. Seja bem-vindo(a), senpai.
+🤭 Ai que gracinha, {usuario} achou o grupo sozinho(a)! Daqui a pouco tá chorando no PV. HAHAHA
+😏 Chegou mais um(a) pra eu não ficar entediada. Obrigada, {usuario}. Hehe~
+🖤 {usuario}, fala "oi" pra galera... ou vai ficar de enfeite?

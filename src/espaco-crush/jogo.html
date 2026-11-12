@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#07031a">
+<title>NAGATORO ESPAÇO CRUSH</title>
+<style>
+/* ═════════════ NAGATORO ESPAÇO CRUSH — DOCTOR VALEYARD ═════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{height:100%;overflow:hidden;background:#07031a;color:#fff;font-family:"Arial Black","Segoe UI",Roboto,Arial,sans-serif;touch-action:none}
+#ceu{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}
+/* logo */
+.logo{text-align:center;line-height:.9;margin-top:2px;filter:drop-shadow(0 4px 0 #2a0a4a) drop-shadow(0 0 18px rgba(190,90,255,.65))}
+.logo .coroa{font-size:22px;display:block;margin-bottom:-4px}
+.logo .l1{font-size:clamp(30px,9vw,46px);letter-spacing:1px;font-style:italic;
+  background:linear-gradient(180deg,#ffffff 0%,#e9e4ff 38%,#9f97c9 52%,#ffffff 70%,#cfc8ef 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:1.5px #3b1870}
+.logo .l2{font-size:clamp(17px,5vw,26px);font-style:italic;letter-spacing:1px}
+.logo .l2 b{font-size:1.35em;background:linear-gradient(180deg,#ffd0f4,#ff4fd1 55%,#c4148f);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px #4a0838}
+.logo .l2 span{background:linear-gradient(180deg,#fff,#cfc8ef);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px #3b1870}
+/* hud */
+.hud{width:min(96vw,560px);display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;margin:10px 0 8px}
+.caixa{background:rgba(14,6,36,.82);border:2px solid rgba(180,110,255,.55);border-radius:14px;padding:6px 8px;text-align:center;box-shadow:0 0 16px rgba(150,70,255,.35),inset 0 0 12px rgba(150,70,255,.18)}
+.rot{font-size:11px;letter-spacing:2px;color:#d9c4ff;font-family:"Segoe UI",Roboto,Arial,sans-serif;font-weight:800}
+.val{font-size:clamp(20px,6vw,28px);color:#fff;text-shadow:0 0 10px rgba(255,120,240,.8)}
+#tempoBarra{height:8px;border-radius:6px;background:rgba(255,255,255,.12);margin-top:4px;overflow:hidden}
+#tempoBarra i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#3cf0ff,#a25bff,#ff4fd1);transition:width .25s linear}
+.caixa.alerta{border-color:#ff4d6d;animation:pisca .6s infinite alternate}
+@keyframes pisca{to{box-shadow:0 0 26px rgba(255,60,100,.9)}}
+/* tabuleiro */
+#moldura{position:relative;width:min(96vw,56vh,560px);aspect-ratio:1;border-radius:20px;padding:8px;
+  background:linear-gradient(145deg,rgba(40,14,90,.92),rgba(12,4,34,.92));
+  border:3px solid #b678ff;box-shadow:0 0 0 2px #2a0d55,0 0 30px rgba(170,80,255,.75),inset 0 0 30px rgba(120,40,255,.35)}
+#tab{width:100%;height:100%;display:block;border-radius:14px}
+.faixa{width:min(96vw,560px);margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:"Segoe UI",Roboto,Arial,sans-serif;font-weight:800;font-size:13px;color:#e8dcff}
+.faixa .modo{background:rgba(14,6,36,.82);border:1px solid rgba(180,110,255,.45);border-radius:999px;padding:6px 12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#som{background:rgba(14,6,36,.82);border:1px solid rgba(180,110,255,.45);color:#fff;border-radius:999px;padding:6px 12px;font-size:14px}
+.assin{margin-top:6px;font-family:"Segoe UI",Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#b9a2e8;opacity:.9}
+/* textos voando */
+#fx{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.voa{position:absolute;transform:translate(-50%,-50%);font-size:clamp(18px,5.5vw,30px);font-style:italic;white-space:nowrap;
+  color:#fff;-webkit-text-stroke:1.5px #4a0a6a;text-shadow:0 0 14px #ff4fd1,0 3px 0 #2a0a4a;animation:voar 1s ease-out forwards}
+.voa.grande{font-size:clamp(26px,8vw,44px);color:#ffe36b;text-shadow:0 0 18px #ffb300,0 4px 0 #5a2a00}
+@keyframes voar{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-140%) scale(1)}}
+/* telas */
+.tela{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(5,2,18,.72);backdrop-filter:blur(3px)}
+.tela.oculta{display:none}
+.cartao{width:min(92vw,440px);border-radius:22px;padding:22px 18px;text-align:center;
+  background:linear-gradient(160deg,rgba(46,16,100,.96),rgba(14,5,38,.97));border:3px solid #b678ff;box-shadow:0 0 40px rgba(170,80,255,.8)}
+.cartao h2{font-size:24px;font-style:italic;margin:10px 0 6px;text-shadow:0 0 12px #ff4fd1}
+.cartao p{font-family:"Segoe UI",Roboto,Arial,sans-serif;font-weight:700;font-size:15px;line-height:1.45;color:#ecdfff}
+.regras{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.regras div{background:rgba(0,0,0,.28);border:1px solid rgba(190,130,255,.35);border-radius:12px;padding:8px 6px;font-family:"Segoe UI",Arial,sans-serif;font-weight:800;font-size:12.5px;color:#fff}
+.regras div b{display:block;font-size:22px;margin-bottom:2px}
+.botao{display:inline-block;margin-top:14px;border:0;border-radius:999px;padding:14px 34px;font-family:inherit;font-size:20px;font-style:italic;color:#fff;letter-spacing:1px;
+  background:linear-gradient(180deg,#ff7be3,#d61aa6 60%,#8e0a6c);box-shadow:0 6px 0 #4c0739,0 0 24px rgba(255,80,210,.8);cursor:pointer}
+.botao:active{transform:translateY(4px);box-shadow:0 2px 0 #4c0739,0 0 24px rgba(255,80,210,.8)}
+.botao[disabled]{opacity:.55}
+.escolha{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.escolha .botao{margin-top:0;text-decoration:none;font-size:18px;padding:13px 20px}
+.botao.zap{background:linear-gradient(180deg,#5cf08a,#16b04a 60%,#0b6e2c);box-shadow:0 6px 0 #064a1c,0 0 24px rgba(60,240,120,.6)}
+.grandao{font-size:clamp(44px,14vw,64px);color:#ffe36b;text-shadow:0 0 22px #ffb300,0 5px 0 #5a2a00;font-style:italic;margin:4px 0}
+.vs{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;font-family:"Segoe UI",Arial,sans-serif;font-weight:900}
+.vs span{background:rgba(0,0,0,.3);border:1px solid rgba(190,130,255,.4);border-radius:10px;padding:6px 10px;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs i{font-style:normal;color:#ff4fd1;font-size:22px}
+.aviso{margin-top:10px;font-size:13px!important;color:#c9b3ff!important}
+/* 💜 PODER DA NAGATORO */
+.poder{width:min(96vw,560px);margin-top:8px;display:flex;align-items:center;gap:10px}
+.poder .medidor{flex:1;height:18px;border-radius:999px;background:rgba(14,6,36,.85);border:2px solid rgba(180,110,255,.55);overflow:hidden;position:relative}
+.poder .medidor i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,#7a2cff,#d14dff,#ff6fe0);box-shadow:0 0 14px #d14dff;transition:width .3s}
+.poder .medidor b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;letter-spacing:2px;font-family:"Segoe UI",Arial,sans-serif;font-weight:900;text-shadow:0 1px 2px #000}
+#btnPoder{width:50px;height:50px;border-radius:50%;border:3px solid #6b3aa8;background:#1a0b33 center/cover;filter:grayscale(.85) brightness(.6);transition:.2s;flex:none}
+#btnPoder.pronto{border-color:#ffd6ff;filter:none;box-shadow:0 0 0 3px #b14dff,0 0 26px #ff4fd1;animation:pulsa .8s infinite alternate}
+@keyframes pulsa{to{transform:scale(1.1);box-shadow:0 0 0 4px #ff8ae6,0 0 40px #ff4fd1}}
+#corte{position:fixed;inset:0;z-index:7;pointer-events:none;display:none;overflow:hidden}
+#corte .luz{position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,140,255,.32) 0 8deg,rgba(120,40,255,0) 8deg 20deg);animation:gira 2.2s linear infinite}
+#corte .fundo{position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,rgba(255,120,240,.45),rgba(60,10,120,.75) 55%,rgba(5,2,18,.85))}
+#corte img{position:absolute;left:50%;bottom:0;height:min(64%,120vw);max-width:none;transform:translate(-50%,40%);opacity:0;
+  filter:drop-shadow(0 0 22px #ff4fd1) drop-shadow(0 0 50px #9d4dff);
+  -webkit-mask-image:radial-gradient(ellipse 50% 55% at 50% 48%,#000 60%,transparent 100%);mask-image:radial-gradient(ellipse 50% 55% at 50% 48%,#000 60%,transparent 100%)}
+#corte .txt{position:absolute;left:12px;right:12px;top:9%;display:flex;flex-direction:column;align-items:center;gap:10px}
+#corte h3{text-align:center;line-height:1.05;font-size:clamp(30px,9vw,52px);font-style:italic;color:#fff;
+  -webkit-text-stroke:2px #5a0a7a;text-shadow:0 0 22px #ff4fd1,0 5px 0 #2a0a4a;opacity:0}
+#corte p{text-align:center;font-family:"Segoe UI",Arial,sans-serif;font-weight:900;font-size:clamp(16px,4.8vw,22px);color:#ffe36b;background:rgba(20,5,40,.7);border:1px solid rgba(255,200,255,.4);border-radius:999px;padding:6px 16px;text-shadow:0 2px 6px #000;opacity:0}
+#corte.ativo{display:block}
+#corte.ativo img{animation:sobe 1.5s cubic-bezier(.2,.9,.25,1.15) forwards}
+#corte.ativo h3,#corte.ativo p{animation:surge 1.5s ease forwards}
+#corte.ativo .fundo,#corte.ativo .luz{animation:gira 2.2s linear infinite,some 1.5s ease forwards}
+@keyframes sobe{0%{opacity:0;transform:translate(-50%,40%) scale(.9)}25%{opacity:1;transform:translate(-50%,0) scale(1.04)}75%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-6%) scale(1.06)}}
+@keyframes surge{0%{opacity:0;transform:scale(2.2)}22%{opacity:1;transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(.9)}}
+@keyframes gira{to{transform:rotate(360deg)}}
+@keyframes some{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.foto{width:96px;height:96px;border-radius:50%;margin:6px auto 0;background:center/cover;border:3px solid #ff8ae6;box-shadow:0 0 0 3px #7a2cff,0 0 26px #ff4fd1}
+.conta{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:110px;font-style:italic;color:#fff;-webkit-text-stroke:3px #4a0a6a;text-shadow:0 0 30px #ff4fd1}
+</style>
+</head>
+<body>
+<canvas id="ceu"></canvas>
+<div id="app">
+  <div class="logo"><span class="coroa">👑</span><div class="l1">NAGATORO</div><div class="l2"><span>ESPAÇO</span> <b>CRUSH</b></div></div>
+  <div class="hud">
+    <div class="caixa"><div class="rot">PONTOS</div><div class="val" id="pontos">0</div></div>
+    <div class="caixa" id="caixaTempo"><div class="rot">TEMPO</div><div class="val" id="tempo">1:30</div><div id="tempoBarra"><i></i></div></div>
+    <div class="caixa"><div class="rot">COMBO</div><div class="val" id="combo">x1</div></div>
+  </div>
+  <div id="moldura"><canvas id="tab"></canvas><div id="fx"></div></div>
+  <div class="poder"><div class="medidor"><i id="poderBarra"></i><b id="poderTxt">PODER DA NAGATORO 0%</b></div><button id="btnPoder" aria-label="Poder da Nagatoro"></button></div>
+  <div class="faixa"><div class="modo" id="modoTxt">🎮 Treino</div><button id="som">🔊</button></div>
+  <div class="assin">CRIADOR · DOCTOR VALEYARD</div>
+</div>
+
+<div class="tela" id="telaInicio"><div class="cartao">
+  <div class="logo"><span class="coroa">👑</span><div class="l1">NAGATORO</div><div class="l2"><span>ESPAÇO</span> <b>CRUSH</b></div></div>
+  <div class="foto" id="fotoIni"></div>
+  <h2 id="iniTitulo">Carregando…</h2>
+  <div id="iniVs"></div>
+  <p id="iniTexto">Preparando o Sistema Solar…</p>
+  <div class="regras">
+    <div><b>💎</b>Junte 3 ou mais iguais</div>
+    <div><b>🚀</b>4 iguais = Foguete<br>(limpa a linha)</div>
+    <div><b>💣</b>Em L ou T = Bomba<br>(explode ao redor)</div>
+    <div><b>🔮</b>5 iguais = Globo da Nagatoro<br>(arraste numa cor e ela some)</div>
+  </div>
+  <p>💜 Faça pontos pra encher o <b>PODER DA NAGATORO</b>. Quando brilhar, toque na carinha dela!</p>
+  <p>Arraste uma gema pro lado. Cascatas seguidas valem <b>combo</b>!</p>
+  <button class="botao" id="btnJogar" disabled>JOGAR</button>
+</div></div>
+
+<div class="tela oculta" id="telaFim"><div class="cartao">
+  <div class="foto" id="fotoFim"></div>
+  <h2>⏱️ ACABOU O TEMPO!</h2>
+  <p id="fimDeboche" style="color:#ffd6ff;font-style:italic"></p>
+  <div class="grandao" id="fimPontos">0</div>
+  <p id="fimTexto">Enviando sua pontuação…</p>
+  <p class="aviso" id="fimAviso"></p>
+  <div class="escolha">
+    <button class="botao" id="btnDeNovo">🔄 JOGAR DE NOVO</button>
+    <a class="botao zap" id="btnZap" href="https://wa.me/">📲 VOLTAR PRO WHATSAPP</a>
+  </div>
+</div></div>
+
+<div id="corte"><div class="luz"></div><div class="fundo"></div><img id="corteImg" alt=""><div class="txt"><h3 id="corteTitulo">PODER DA NAGATORO!</h3><p id="corteSub"></p></div></div>
+<div class="conta" id="conta" style="display:none"></div>
+
+<script>
+"use strict";
+/* ════════════════════════ CONFIG ════════════════════════ */
+const PARAMS = new URLSearchParams(location.search);
+const TOKEN = PARAMS.get("t") || "";
+const API = location.pathname.replace(/\/+$/, "").replace(/\/jogo$/,"") + "/api";
+const BASE = API.replace(/\/api$/, "");
+let DURACAO = 90;
+// 💜 fotos da Nagatoro (servidas pelo próprio bot)
+const imgNaga = new Image(), imgRosto = new Image();
+imgNaga.src = BASE + "/nagatoro.jpg"; imgRosto.src = BASE + "/rosto.png";
+imgRosto.onload = () => { try { redimTab(); } catch {} };            // segundos (o servidor pode mudar)
+const N = 8, TIPOS = 6;
+const $ = id => document.getElementById(id);
+
+/* ════════════════════════ SOM (sintetizado, sem arquivo) ════════════════════════ */
+let audio = null, somLigado = true;
+function ctxAudio(){ if(!audio){ try{ audio = new (window.AudioContext||window.webkitAudioContext)(); }catch{} } return audio; }
+function tom(freq, dur=0.12, tipo="sine", vol=0.18, deslize=0){
+  if(!somLigado) return; const a = ctxAudio(); if(!a) return;
+  const o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+  o.type = tipo; o.frequency.setValueAtTime(freq, t); if(deslize) o.frequency.exponentialRampToValueAtTime(Math.max(40,freq*deslize), t+dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+0.02);
+}
+const SOM = {
+  troca(){ tom(520,.07,"triangle",.12); },
+  errado(){ tom(200,.15,"square",.08,.7); },
+  limpa(c){ const b = 440*Math.pow(1.12, Math.min(c,10)); tom(b,.16,"sine",.2); setTimeout(()=>tom(b*1.5,.12,"triangle",.12),40); },
+  especial(){ tom(180,.45,"sawtooth",.12,4); },
+  bomba(){ tom(90,.5,"square",.2,.3); },
+  fim(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tom(f,.25,"triangle",.18),i*120)); },
+  bip(){ tom(880,.08,"square",.1); }
+};
+$("som").onclick = () => { somLigado = !somLigado; $("som").textContent = somLigado ? "🔊" : "🔇"; };
+
+/* ════════════════════════ CÉU: SISTEMA SOLAR ════════════════════════ */
+const ceu = $("ceu"), cc = ceu.getContext("2d");
+let CW=0, CH=0, DPR=1, estrelas=[], fundoPronto=null, cadentes=[];
+const PLANETAS = [
+  // raio da órbita (fração), tamanho, velocidade, cores, extras
+  { o:.13, r:5,  v:1.6,  c:["#d9d2c5","#8f8578"], nome:"Mercúrio" },
+  { o:.20, r:8,  v:1.15, c:["#ffe3a8","#c98d3e"], nome:"Vênus" },
+  { o:.29, r:10, v:.9,   c:["#8fd3ff","#1f5fb5"], terra:true, nome:"Terra" },
+  { o:.38, r:7,  v:.72,  c:["#ff9f7a","#b0381e"], nome:"Marte" },
+  { o:.53, r:20, v:.42,  c:["#f3d3a6","#b5733f"], faixas:true, nome:"Júpiter" },
+  { o:.68, r:16, v:.3,   c:["#f7e2a6","#c79a4a"], anel:true, nome:"Saturno" },
+  { o:.82, r:11, v:.22,  c:["#c9fbff","#4fb6c9"], nome:"Urano" },
+  { o:.95, r:11, v:.17,  c:["#8aa6ff","#2a3fb8"], nome:"Netuno" }
+];
+PLANETAS.forEach((p,i)=>p.a = i*1.7 + Math.random());
+function redimCeu(){
+  DPR = Math.min(2, window.devicePixelRatio||1);
+  CW = innerWidth; CH = innerHeight;
+  ceu.width = CW*DPR; ceu.height = CH*DPR; cc.setTransform(DPR,0,0,DPR,0,0);
+  estrelas = Array.from({length: Math.round(CW*CH/2600)}, () => ({ x:Math.random()*CW, y:Math.random()*CH, r:Math.random()*1.4+.2, f:Math.random()*6.28, v:.5+Math.random()*2 }));
+  // fundo fixo pré-desenhado: degradê + nebulosas
+  const f = document.createElement("canvas"); f.width = CW*DPR; f.height = CH*DPR; const g = f.getContext("2d"); g.scale(DPR,DPR);
+  const lin = g.createLinearGradient(0,0,0,CH); lin.addColorStop(0,"#0a0322"); lin.addColorStop(.5,"#12052e"); lin.addColorStop(1,"#05020f");
+  g.fillStyle = lin; g.fillRect(0,0,CW,CH);
+  const neb = (x,y,r,c)=>{ const rg=g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,c); rg.addColorStop(1,"rgba(0,0,0,0)"); g.fillStyle=rg; g.fillRect(0,0,CW,CH); };
+  neb(CW*.85,CH*.25,CW*.6,"rgba(150,40,220,.35)"); neb(CW*.1,CH*.75,CW*.7,"rgba(60,30,200,.32)");
+  neb(CW*.6,CH*.95,CW*.5,"rgba(255,60,180,.22)"); neb(CW*.3,CH*.1,CW*.4,"rgba(40,160,255,.15)");
+  fundoPronto = f;
+}
+function desenhaPlaneta(g,x,y,p){
+  const r = p.r*Math.max(.8,Math.min(1.6,CW/420));
+  if(p.anel){ g.save(); g.translate(x,y); g.rotate(-.35); g.strokeStyle="rgba(240,220,170,.75)"; g.lineWidth=r*.35; g.beginPath(); g.ellipse(0,0,r*2.1,r*.6,0,Math.PI,2*Math.PI); g.stroke(); g.restore(); }
+  const rg = g.createRadialGradient(x-r*.4,y-r*.4,r*.1,x,y,r); rg.addColorStop(0,p.c[0]); rg.addColorStop(1,p.c[1]);
+  g.fillStyle = rg; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
+  if(p.faixas){ g.save(); g.beginPath(); g.arc(x,y,r,0,7); g.clip(); g.fillStyle="rgba(150,80,40,.45)"; for(let k=-2;k<=2;k++) g.fillRect(x-r,y+k*r*.38-r*.08,r*2,r*.16); g.restore(); }
+  if(p.terra){ g.save(); g.beginPath(); g.arc(x,y,r,0,7); g.clip(); g.fillStyle="rgba(70,190,90,.85)"; g.beginPath(); g.arc(x-r*.3,y-r*.1,r*.45,0,7); g.arc(x+r*.45,y+r*.35,r*.3,0,7); g.fill(); g.restore();
+    const lua = p.a*5; g.fillStyle="#ddd"; g.beginPath(); g.arc(x+Math.cos(lua)*r*1.9,y+Math.sin(lua)*r*1.9,r*.28,0,7); g.fill(); }
+  if(p.anel){ g.save(); g.translate(x,y); g.rotate(-.35); g.strokeStyle="rgba(250,230,180,.9)"; g.lineWidth=r*.35; g.beginPath(); g.ellipse(0,0,r*2.1,r*.6,0,0,Math.PI); g.stroke(); g.restore(); }
+  // sombra do lado oposto ao Sol
+  const sg = g.createRadialGradient(x+r*.5,y+r*.5,0,x+r*.5,y+r*.5,r*1.4); sg.addColorStop(0,"rgba(0,0,10,.55)"); sg.addColorStop(1,"rgba(0,0,10,0)");
+  g.fillStyle=sg; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
+}
+let tCeu = 0;
+function desenhaCeu(dt){
+  tCeu += dt;
+  cc.drawImage(fundoPronto,0,0,CW,CH);
+  for(const s of estrelas){ const a = .35+.65*Math.abs(Math.sin(s.f + tCeu*s.v)); cc.fillStyle=`rgba(255,255,255,${a})`; cc.fillRect(s.x,s.y,s.r,s.r); }
+  // Sol no canto de cima à esquerda
+  const sx = -CW*.08, sy = CH*.08, sr = Math.max(60, CW*.2);
+  const brilho = cc.createRadialGradient(sx,sy,sr*.2,sx,sy,sr*2.6); brilho.addColorStop(0,"rgba(255,220,120,.55)"); brilho.addColorStop(.4,"rgba(255,120,40,.18)"); brilho.addColorStop(1,"rgba(255,80,0,0)");
+  cc.fillStyle = brilho; cc.fillRect(0,0,CW,CH);
+  const sol = cc.createRadialGradient(sx,sy,0,sx,sy,sr); sol.addColorStop(0,"#fff6c8"); sol.addColorStop(.5,"#ffc23d"); sol.addColorStop(1,"#ff6a00");
+  cc.fillStyle = sol; cc.beginPath(); cc.arc(sx,sy,sr*(1+.02*Math.sin(tCeu*2)),0,7); cc.fill();
+  // órbitas + planetas
+  const R = Math.hypot(CW,CH)*1.02;
+  cc.lineWidth = 1;
+  for(const p of PLANETAS){
+    cc.strokeStyle="rgba(190,150,255,.13)"; cc.beginPath(); cc.ellipse(sx,sy,R*p.o,R*p.o*.78,.25,0,7); cc.stroke();
+    p.a += dt*p.v*.06;
+    const ang = p.a % (Math.PI*2), cos=Math.cos(.25), sin=Math.sin(.25);
+    const ex = Math.cos(ang)*R*p.o, ey = Math.sin(ang)*R*p.o*.78;
+    const x = sx + ex*cos - ey*sin, y = sy + ex*sin + ey*cos;
+    if(x>-60 && x<CW+60 && y>-60 && y<CH+60) desenhaPlaneta(cc,x,y,p);
+  }
+  // estrela cadente de vez em quando
+  if(Math.random()<dt*.25) cadentes.push({x:Math.random()*CW, y:Math.random()*CH*.5, vx:-(300+Math.random()*300), vy:160+Math.random()*120, vida:1});
+  cadentes = cadentes.filter(c=>{ c.x+=c.vx*dt; c.y+=c.vy*dt; c.vida-=dt*1.2; if(c.vida<=0) return false;
+    const gr = cc.createLinearGradient(c.x,c.y,c.x-c.vx*.12,c.y-c.vy*.12); gr.addColorStop(0,`rgba(255,255,255,${c.vida})`); gr.addColorStop(1,"rgba(255,255,255,0)");
+    cc.strokeStyle=gr; cc.lineWidth=2; cc.beginPath(); cc.moveTo(c.x,c.y); cc.lineTo(c.x-c.vx*.12,c.y-c.vy*.12); cc.stroke(); return true; });
+}
+
+/* ════════════════════════ GEMAS (desenhadas, viram sprite) ════════════════════════ */
+const CORES = [
+  { n:"estrela",  a:"#fff27a", b:"#f5a300", e:"#ffcf3d" },
+  { n:"diamante", a:"#9be7ff", b:"#1667ff", e:"#3aa0ff" },
+  { n:"coracao",  a:"#ff9aa8", b:"#d1002b", e:"#ff3355" },
+  { n:"triangulo",a:"#b8ff9a", b:"#14a83a", e:"#35e05a" },
+  { n:"flor",     a:"#f2a8ff", b:"#9a1fd6", e:"#c94dff" },
+  { n:"planeta",  a:"#ffd0a0", b:"#ff6a12", e:"#ff8a2a" }
+];
+function formaGema(g,t,s){
+  const h = s/2; g.beginPath();
+  if(t===0){ for(let i=0;i<10;i++){ const ang=-Math.PI/2+i*Math.PI/5, r=i%2?h*.45:h*.95; g.lineTo(Math.cos(ang)*r,Math.sin(ang)*r*1.02+h*.04);} g.closePath(); }
+  else if(t===1){ g.moveTo(-h*.92,-h*.22); g.lineTo(-h*.5,-h*.72); g.lineTo(h*.5,-h*.72); g.lineTo(h*.92,-h*.22); g.lineTo(0,h*.9); g.closePath(); }
+  else if(t===2){ g.moveTo(0,h*.88); g.bezierCurveTo(-h*1.25,0,-h*.75,-h*1.05,0,-h*.42); g.bezierCurveTo(h*.75,-h*1.05,h*1.25,0,0,h*.88); g.closePath(); }
+  else if(t===3){ g.moveTo(0,-h*.9); g.quadraticCurveTo(h*.12,-h*.95,h*.2,-h*.8); g.lineTo(h*.92,h*.62); g.quadraticCurveTo(h*.95,h*.8,h*.75,h*.8); g.lineTo(-h*.75,h*.8); g.quadraticCurveTo(-h*.95,h*.8,-h*.92,h*.62); g.lineTo(-h*.2,-h*.8); g.quadraticCurveTo(-h*.12,-h*.95,0,-h*.9); g.closePath(); }
+  else if(t===4){ for(let i=0;i<5;i++){ const ang=-Math.PI/2+i*2*Math.PI/5; const x=Math.cos(ang)*h*.48, y=Math.sin(ang)*h*.48; g.moveTo(x+h*.42,y); g.arc(x,y,h*.42,0,7);} g.moveTo(h*.5,0); g.arc(0,0,h*.5,0,7); }
+  else { g.arc(0,0,h*.72,0,7); }
+}
+function spriteGema(t,S){
+  const c = document.createElement("canvas"); c.width=c.height=Math.ceil(S*1.3); const g=c.getContext("2d"); const k=CORES[t];
+  g.translate(c.width/2,c.height/2);
+  g.shadowColor = k.e; g.shadowBlur = S*.18;
+  formaGema(g,t,S);
+  const rg = g.createRadialGradient(-S*.15,-S*.2,S*.05,0,0,S*.6); rg.addColorStop(0,k.a); rg.addColorStop(.55,k.e); rg.addColorStop(1,k.b);
+  g.fillStyle=rg; g.fill("nonzero"); g.shadowBlur=0;
+  g.lineWidth = Math.max(1.5,S*.035); g.strokeStyle="rgba(0,0,0,.35)"; g.stroke();
+  if(t===5){ // anel do planetinha
+    g.save(); g.rotate(-.4); g.strokeStyle="rgba(255,240,210,.95)"; g.lineWidth=S*.07; g.beginPath(); g.ellipse(0,0,S*.55,S*.17,0,0,Math.PI); g.stroke(); g.restore(); }
+  if(t===1){ g.strokeStyle="rgba(255,255,255,.55)"; g.lineWidth=S*.025; g.beginPath(); g.moveTo(-S*.46,-S*.11); g.lineTo(S*.46,-S*.11); g.moveTo(-S*.25,-S*.36); g.lineTo(0,S*.45); g.lineTo(S*.25,-S*.36); g.stroke(); }
+  // brilho de vidro
+  g.save(); formaGema(g,t,S); g.clip();
+  const br = g.createLinearGradient(0,-S*.5,0,S*.1); br.addColorStop(0,"rgba(255,255,255,.75)"); br.addColorStop(1,"rgba(255,255,255,0)");
+  g.fillStyle=br; g.beginPath(); g.ellipse(-S*.08,-S*.22,S*.32,S*.16,-.3,0,7); g.fill(); g.restore();
+  g.fillStyle="rgba(255,255,255,.95)"; g.beginPath(); g.arc(-S*.18,-S*.22,S*.05,0,7); g.fill();
+  return c;
+}
+function spriteFoguete(t,S,vertical){
+  const c=document.createElement("canvas"); c.width=c.height=Math.ceil(S*1.3); const g=c.getContext("2d"); const k=CORES[t];
+  g.translate(c.width/2,c.height/2); if(!vertical) g.rotate(Math.PI/2);
+  g.shadowColor=k.e; g.shadowBlur=S*.25;
+  // chama
+  const fl=g.createLinearGradient(0,S*.25,0,S*.62); fl.addColorStop(0,"#fff6a0"); fl.addColorStop(.5,"#ff9a00"); fl.addColorStop(1,"rgba(255,40,0,0)");
+  g.fillStyle=fl; g.beginPath(); g.moveTo(-S*.13,S*.25); g.quadraticCurveTo(0,S*.75,S*.13,S*.25); g.fill();
+  // aletas
+  g.fillStyle=k.b; g.beginPath(); g.moveTo(-S*.18,S*.05); g.lineTo(-S*.34,S*.32); g.lineTo(-S*.15,S*.27); g.fill(); g.beginPath(); g.moveTo(S*.18,S*.05); g.lineTo(S*.34,S*.32); g.lineTo(S*.15,S*.27); g.fill();
+  // corpo
+  const cp=g.createLinearGradient(-S*.2,0,S*.2,0); cp.addColorStop(0,"#d8d8e8"); cp.addColorStop(.5,"#ffffff"); cp.addColorStop(1,"#9a9ab5");
+  g.fillStyle=cp; g.beginPath(); g.moveTo(0,-S*.5); g.bezierCurveTo(S*.26,-S*.25,S*.2,S*.15,S*.15,S*.28); g.lineTo(-S*.15,S*.28); g.bezierCurveTo(-S*.2,S*.15,-S*.26,-S*.25,0,-S*.5); g.fill();
+  g.shadowBlur=0; g.fillStyle=k.e; g.beginPath(); g.moveTo(0,-S*.5); g.bezierCurveTo(S*.13,-S*.38,S*.18,-S*.3,S*.2,-S*.25); g.lineTo(-S*.2,-S*.25); g.bezierCurveTo(-S*.18,-S*.3,-S*.13,-S*.38,0,-S*.5); g.fill();
+  g.fillStyle=k.b; g.fillRect(-S*.16,S*.12,S*.32,S*.07);
+  g.fillStyle="#3ad1ff"; g.strokeStyle="#334"; g.lineWidth=S*.03; g.beginPath(); g.arc(0,-S*.08,S*.09,0,7); g.fill(); g.stroke();
+  return c;
+}
+function spriteBomba(t,S){
+  const c=document.createElement("canvas"); c.width=c.height=Math.ceil(S*1.3); const g=c.getContext("2d"); const k=CORES[t];
+  g.translate(c.width/2,c.height/2+S*.05);
+  g.shadowColor=k.e; g.shadowBlur=S*.3; g.strokeStyle=k.e; g.lineWidth=S*.07; g.beginPath(); g.arc(0,0,S*.42,0,7); g.stroke(); g.shadowBlur=0;
+  const rg=g.createRadialGradient(-S*.12,-S*.14,S*.03,0,0,S*.4); rg.addColorStop(0,"#6a6a7a"); rg.addColorStop(1,"#0b0b12");
+  g.fillStyle=rg; g.beginPath(); g.arc(0,0,S*.36,0,7); g.fill();
+  g.fillStyle="#2a2a35"; g.fillRect(-S*.08,-S*.45,S*.16,S*.1);
+  g.strokeStyle="#c9a46a"; g.lineWidth=S*.04; g.beginPath(); g.moveTo(0,-S*.45); g.quadraticCurveTo(S*.1,-S*.6,S*.2,-S*.55); g.stroke();
+  g.fillStyle="#ffde59"; g.shadowColor="#ff9a00"; g.shadowBlur=S*.2; g.beginPath(); g.arc(S*.21,-S*.56,S*.06,0,7); g.fill(); g.shadowBlur=0;
+  // caveirinha
+  g.fillStyle="#f2f2f2"; g.beginPath(); g.arc(0,-S*.02,S*.15,0,7); g.fill(); g.fillRect(-S*.08,S*.08,S*.16,S*.08);
+  g.fillStyle="#111"; g.beginPath(); g.arc(-S*.06,-S*.03,S*.04,0,7); g.arc(S*.06,-S*.03,S*.04,0,7); g.fill();
+  g.fillRect(-S*.04,S*.1,S*.02,S*.05); g.fillRect(S*.02,S*.1,S*.02,S*.05);
+  return c;
+}
+function spriteOrbe(S){
+  const c=document.createElement("canvas"); c.width=c.height=Math.ceil(S*1.3); const g=c.getContext("2d");
+  g.translate(c.width/2,c.height/2);
+  const cores=["#ff3b3b","#ff9a00","#ffe600","#2be05a","#2aa8ff","#a64dff"];
+  g.shadowColor="#fff"; g.shadowBlur=S*.3;
+  for(let i=0;i<6;i++){ g.fillStyle=cores[i]; g.beginPath(); g.moveTo(0,0); g.arc(0,0,S*.42,i*Math.PI/3,(i+1)*Math.PI/3); g.fill(); }
+  g.shadowBlur=0;
+  const rg=g.createRadialGradient(-S*.12,-S*.14,S*.02,0,0,S*.42); rg.addColorStop(0,"rgba(255,255,255,.85)"); rg.addColorStop(.5,"rgba(255,255,255,.1)"); rg.addColorStop(1,"rgba(0,0,0,.35)");
+  g.fillStyle=rg; g.beginPath(); g.arc(0,0,S*.42,0,7); g.fill();
+  // carinha da Nagatoro dentro do globo
+  if(imgRosto.complete && imgRosto.naturalWidth){ g.save(); g.beginPath(); g.arc(0,0,S*.3,0,7); g.clip(); g.drawImage(imgRosto,-S*.3,-S*.3,S*.6,S*.6); g.restore();
+    g.strokeStyle="#fff"; g.lineWidth=S*.035; g.shadowColor="#ff4fd1"; g.shadowBlur=S*.2; g.beginPath(); g.arc(0,0,S*.3,0,7); g.stroke(); g.shadowBlur=0; }
+  g.strokeStyle="rgba(255,255,255,.8)"; g.lineWidth=S*.03; g.beginPath(); g.ellipse(0,0,S*.58,S*.2,-.5,0,7); g.stroke();
+  return c;
+}
+
+/* ════════════════════════ TABULEIRO ════════════════════════ */
+const tab = $("tab"), tg = tab.getContext("2d"), fx = $("fx");
+let TW=0, CEL=0, SPR={};
+function redimTab(){
+  const r = tab.getBoundingClientRect(); TW = r.width;
+  tab.width = TW*DPR; tab.height = TW*DPR; tg.setTransform(DPR,0,0,DPR,0,0);
+  CEL = TW/N; const S = CEL*.86*DPR;
+  SPR = { g:[], rh:[], rv:[], b:[], orbe:spriteOrbe(S) };
+  for(let t=0;t<TIPOS;t++){ SPR.g[t]=spriteGema(t,S); SPR.rh[t]=spriteFoguete(t,S,false); SPR.rv[t]=spriteFoguete(t,S,true); SPR.b[t]=spriteBomba(t,S); }
+  for(const p of todas()) { p.x = p.c*CEL; p.y = p.r*CEL; }
+}
+let grade = [], idSeq = 1;
+const nova = (r,c,t,esp=null) => ({ id:idSeq++, r, c, t, esp, x:c*CEL, y:r*CEL, esc:1, alfa:1, rot:0 });
+const dentro = (r,c) => r>=0 && r<N && c>=0 && c<N;
+function* todas(){ for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(grade[r]&&grade[r][c]) yield grade[r][c]; }
+const rnd = n => Math.floor(Math.random()*n);
+function preencherInicial(){
+  do {
+    grade = [];
+    for(let r=0;r<N;r++){ grade[r]=[]; for(let c=0;c<N;c++){ let t; do { t=rnd(TIPOS); } while((c>=2&&grade[r][c-1].t===t&&grade[r][c-2].t===t)||(r>=2&&grade[r-1][c].t===t&&grade[r-2][c].t===t)); grade[r][c]=nova(r,c,t); } }
+  } while(!temJogada());
+}
+const tipoDe = p => p && p.esp!=="orbe" ? p.t : -1;
+function acharTrincas(){
+  const runs=[];
+  for(let r=0;r<N;r++){ let c=0; while(c<N){ const t=tipoDe(grade[r][c]); let k=c+1; while(k<N && t>=0 && tipoDe(grade[r][k])===t) k++; if(t>=0 && k-c>=3) runs.push({d:"h",cel:Array.from({length:k-c},(_,i)=>[r,c+i]),t}); c = Math.max(k,c+1); } }
+  for(let c=0;c<N;c++){ let r=0; while(r<N){ const t=tipoDe(grade[r][c]); let k=r+1; while(k<N && t>=0 && tipoDe(grade[k][c])===t) k++; if(t>=0 && k-r>=3) runs.push({d:"v",cel:Array.from({length:k-r},(_,i)=>[r+i,c]),t}); r = Math.max(k,r+1); } }
+  return runs;
+}
+function temJogada(){
+  const tenta=(r1,c1,r2,c2)=>{ const a=grade[r1][c1], b=grade[r2][c2]; if(a.esp==="orbe"||b.esp==="orbe") return true; if(a.esp&&b.esp) return true;
+    grade[r1][c1]=b; grade[r2][c2]=a; const ok=acharTrincas().length>0; grade[r1][c1]=a; grade[r2][c2]=b; return ok; };
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){ if(c<N-1&&tenta(r,c,r,c+1)) return true; if(r<N-1&&tenta(r,c,r+1,c)) return true; }
+  return false;
+}
+
+/* ════════════════════════ ANIMAÇÃO ════════════════════════ */
+let tweens = [], particulas = [], tremor = 0;
+const easeOut = t => 1-Math.pow(1-t,3), easeIn = t => t*t, easeBack = t => { const s=1.7; t-=1; return t*t*((s+1)*t+s)+1; };
+function anima(obj, props, dur, ease=easeOut){
+  return new Promise(res=>{ const de={}; for(const k in props) de[k]=obj[k]; tweens.push({obj,de,para:props,dur,ease,t:0,res}); });
+}
+const espera = ms => new Promise(r=>setTimeout(r,ms));
+function explodir(x,y,cor,qtd=10){
+  for(let i=0;i<qtd;i++){ const a=Math.random()*6.28, v=60+Math.random()*220; particulas.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,vida:1,cor,r:2+Math.random()*3.5}); }
+}
+function textoVoa(txt, x, y, grande=false){
+  const d=document.createElement("div"); d.className="voa"+(grande?" grande":""); d.textContent=txt; d.style.left=x+"px"; d.style.top=y+"px"; fx.appendChild(d); setTimeout(()=>d.remove(),1000);
+}
+
+/* ════════════════════════ 💜 PODER DA NAGATORO (ela sobe na tela) ════════════════════════ */
+const FRASES_PODER = ["Sai da frente, senpai~","Deixa que eu resolvo, seu lerdo!","Olha e aprende, hehe~","Isso aqui é fácil demais pra mim!","Tá vendo? Eu sou demais 💜"];
+let corteRodando = false;
+async function corteNagatoro(titulo="PODER DA NAGATORO!"){
+  if(corteRodando) return; corteRodando = true;
+  const c=$("corte"); $("corteImg").src = imgNaga.src; $("corteTitulo").textContent = titulo;
+  $("corteSub").textContent = FRASES_PODER[rnd(FRASES_PODER.length)];
+  c.classList.remove("ativo"); void c.offsetWidth; c.classList.add("ativo");
+  tom(300,.6,"sawtooth",.1,3); setTimeout(()=>tom(900,.35,"triangle",.16,1.5),250); navigator.vibrate&&navigator.vibrate([30,40,60]);
+  await espera(950);           // o efeito acontece com ela ainda na tela
+  setTimeout(()=>{ c.classList.remove("ativo"); corteRodando=false; }, 600);
+}
+const PODER_CHEIO = 3000;      // pontos pra encher o medidor
+let poder = 0;
+function encherPoder(n){ if(!rodando) return; poder = Math.min(PODER_CHEIO, poder + n); atualizarPoder(); }
+function atualizarPoder(){
+  const pct = Math.round(poder/PODER_CHEIO*100);
+  $("poderBarra").style.width = pct+"%";
+  $("poderTxt").textContent = pct>=100 ? "💜 PODER PRONTO! TOQUE NELA" : `PODER DA NAGATORO ${pct}%`;
+  $("btnPoder").classList.toggle("pronto", pct>=100);
+}
+$("btnPoder").onclick = async () => {
+  if(poder < PODER_CHEIO || ocupado || !rodando) return;
+  ocupado = true; poder = 0; atualizarPoder();
+  await corteNagatoro("PODER DA NAGATORO!");
+  // ela transforma 1 gema em Globo e 2 em foguete
+  const normais = [...todas()].filter(p=>!p.esp).sort(()=>Math.random()-.5);
+  const escolha = normais.slice(0,3);
+  escolha.forEach((p,i)=>{ p.esp = i===0 ? "orbe" : (i===1?"rh":"rv"); if(i===0) p.t=-1; p.esc=1.8; anima(p,{esc:1},380,easeBack); explodir(p.x+CEL/2,p.y+CEL/2,"#ff8ae6",22); });
+  textoVoa("🔮 GLOBO + 🚀🚀", TW/2+8, TW*.3, true);
+  somarPontos(500, TW/2+8, TW*.55, true);
+  await espera(400);
+  ocupado = false;
+};
+
+/* ════════════════════════ ESTADO DO JOGO ════════════════════════ */
+let pontos=0, combo=1, maxCombo=1, jogadas=0, ocupado=false, rodando=false, fimEm=0, ultimoBip=0;
+const elPontos=$("pontos"), elTempo=$("tempo"), elCombo=$("combo"), elBarra=$("tempoBarra").firstElementChild;
+let pontosMostrados = 0;
+function somarPontos(n, x, y, grande){ pontos += n; encherPoder(n); if(x!=null) textoVoa("+"+n.toLocaleString("pt-BR"), x, y, grande); }
+
+/* ════════════════════════ LÓGICA ════════════════════════ */
+function areaEspecial(p){
+  const cel=[];
+  if(p.esp==="rh") for(let c=0;c<N;c++) cel.push([p.r,c]);
+  else if(p.esp==="rv") for(let r=0;r<N;r++) cel.push([r,p.c]);
+  else if(p.esp==="bomba") for(let r=p.r-1;r<=p.r+1;r++) for(let c=p.c-1;c<=p.c+1;c++) if(dentro(r,c)) cel.push([r,c]);
+  else if(p.esp==="orbe"){ const cont=Array(TIPOS).fill(0); for(const q of todas()) if(q.esp!=="orbe") cont[q.t]++; const alvo=cont.indexOf(Math.max(...cont)); for(const q of todas()) if(q.t===alvo) cel.push([q.r,q.c]); cel.push([p.r,p.c]); }
+  return cel;
+}
+// limpa um conjunto de células, ativando especiais em cadeia
+async function limpar(chaves, criar=[]){
+  const fila=[...chaves], vistos=new Set(), protegidos=new Set(criar.map(k=>k.r+","+k.c));
+  let teveBomba=false, teveEsp=false, teveOrbe=false;
+  while(fila.length){ const [r,c]=fila.shift(); const k=r+","+c; if(vistos.has(k)||!dentro(r,c)) continue; vistos.add(k); const p=grade[r][c]; if(!p) continue;
+    if(p.esp && !protegidos.has(k)){ teveEsp=true; if(p.esp==="bomba") teveBomba=true; if(p.esp==="orbe") teveOrbe=true; for(const q of areaEspecial(p)) fila.push(q);
+      if(p.esp==="rh"||p.esp==="rv") raio(p); } }
+  for(const k of protegidos) vistos.delete(k);
+  if(!vistos.size) return 0;
+  if(teveOrbe) await corteNagatoro("GLOBO DA NAGATORO!");
+  if(teveBomba){ SOM.bomba(); tremor=12; navigator.vibrate&&navigator.vibrate(40); } else if(teveEsp) SOM.especial();
+  SOM.limpa(combo);
+  const lista=[...vistos].map(k=>k.split(",").map(Number)).map(([r,c])=>grade[r][c]).filter(Boolean);
+  const proms=lista.map(p=>{ explodir(p.x+CEL/2,p.y+CEL/2,CORES[p.t]?CORES[p.t].e:"#fff", p.esp?18:9); return anima(p,{esc:0,alfa:0,rot:.6},220,easeIn); });
+  // cria os especiais no lugar
+  for(const k of criar){ const p=grade[k.r][k.c]; p.esp=k.esp; if(k.esp==="orbe") p.t=-1; p.esc=1.5; anima(p,{esc:1},300,easeBack); }
+  await Promise.all(proms);
+  for(const p of lista) grade[p.r][p.c]=null;
+  return lista.length;
+}
+let raios=[];
+function raio(p){ raios.push({ h:p.esp==="rh", r:p.r, c:p.c, vida:1, cor:CORES[p.t]?.e||"#fff" }); }
+async function gravidade(){
+  const proms=[];
+  for(let c=0;c<N;c++){
+    let livre=N-1;
+    for(let r=N-1;r>=0;r--){ const p=grade[r][c]; if(p){ if(r!==livre){ grade[livre][c]=p; grade[r][c]=null; p.r=livre; proms.push(anima(p,{y:livre*CEL},140+ (livre-r)*45,easeIn)); } livre--; } }
+    let nasc=0;
+    for(let r=livre;r>=0;r--){ nasc++; const p=nova(r,c,rnd(TIPOS)); p.y=-nasc*CEL; grade[r][c]=p; proms.push(anima(p,{y:r*CEL},180+(r+nasc)*45,easeIn)); }
+  }
+  await Promise.all(proms);
+}
+// resolve trincas + cascatas
+async function resolver(trocadas){
+  combo=1;
+  while(true){
+    const runs=acharTrincas(); if(!runs.length) break;
+    // junta trincas que se tocam (pra achar L e T)
+    const grupos=[];
+    for(const run of runs){ const ks=new Set(run.cel.map(([r,c])=>r+","+c)); let g=grupos.find(g=>[...ks].some(k=>g.ks.has(k))&&g.t===run.t); if(g){ ks.forEach(k=>g.ks.add(k)); g.runs.push(run);} else grupos.push({ks,runs:[run],t:run.t}); }
+    const limparSet=new Set(), criar=[];
+    let pts=0, cx=0, cy=0, nCel=0, especialFeito=null;
+    for(const g of grupos){
+      g.ks.forEach(k=>limparSet.add(k));
+      const maior=Math.max(...g.runs.map(r=>r.cel.length)), temH=g.runs.some(r=>r.d==="h"), temV=g.runs.some(r=>r.d==="v");
+      let esp=null; if(maior>=5) esp="orbe"; else if(temH&&temV) esp="bomba"; else if(maior===4) esp=g.runs[0].d==="h"?"rv":"rh";
+      if(esp){
+        let alvo=null;
+        if(trocadas) for(const t of trocadas) if(g.ks.has(t.r+","+t.c)) alvo=t;
+        if(!alvo){ if(esp==="bomba"){ const conta={}; g.runs.forEach(r=>r.cel.forEach(([a,b])=>{const k=a+","+b; conta[k]=(conta[k]||0)+1;})); const k=Object.keys(conta).find(k=>conta[k]>1)||[...g.ks][0]; const [a,b]=k.split(",").map(Number); alvo={r:a,c:b}; }
+          else { const run=g.runs.find(r=>r.cel.length===maior); const [a,b]=run.cel[Math.floor(run.cel.length/2)]; alvo={r:a,c:b}; } }
+        // não sobrescreve um especial que já existe ali
+        if(!grade[alvo.r][alvo.c].esp){ criar.push({r:alvo.r,c:alvo.c,esp}); especialFeito=esp; pts+= esp==="orbe"?300:esp==="bomba"?200:120; }
+      }
+      g.ks.forEach(k=>{ const [a,b]=k.split(",").map(Number); cx+=b; cy+=a; nCel++; });
+    }
+    const n = await limpar([...limparSet].map(k=>k.split(",").map(Number)), criar);
+    pts += n*10*combo + (n>3?(n-3)*15*combo:0);
+    const x=(cx/nCel+.5)*CEL+8, y=(cy/nCel+.5)*CEL+8;
+    somarPontos(pts, x, y, combo>=3 || n>=8);
+    if(combo>=2) elogio(combo);
+    if(especialFeito) textoVoa(especialFeito==="orbe"?"🔮 GLOBO DA NAGATORO!":especialFeito==="bomba"?"💣 BOMBA!":"🚀 FOGUETE!", TW/2+8, TW*.18, true);
+    maxCombo=Math.max(maxCombo,combo); elCombo.textContent="x"+combo;
+    await gravidade();
+    combo++;
+    trocadas=null;
+  }
+  combo=1; elCombo.textContent="x1";
+}
+function elogio(c){ const fr=["","","DOCE!","DELÍCIA!","INCRÍVEL!","DIVINO!","SUPERNOVA!","BIG BANG!"]; textoVoa(fr[Math.min(c,fr.length-1)], TW/2+8, TW*.45, true); }
+// troca especial + especial / buraco negro
+async function trocaEspecial(a,b){
+  const ea=a.esp, eb=b.esp; let cel=[];
+  if(ea==="orbe"&&eb==="orbe"){ await corteNagatoro("DUPLO GLOBO!!"); for(const q of todas()) cel.push([q.r,q.c]); }
+  else if(ea==="orbe"||eb==="orbe"){
+    const orbe=ea==="orbe"?a:b, outra=ea==="orbe"?b:a;
+    await corteNagatoro("GLOBO DA NAGATORO!");
+    if(outra.esp && outra.esp!=="orbe"){ // vira tudo especial daquela cor
+      for(const q of todas()) if(q.t===outra.t && !q.esp){ q.esp = outra.esp==="bomba"?"bomba":(Math.random()<.5?"rh":"rv"); q.esc=1.4; anima(q,{esc:1},250,easeBack); }
+      await espera(300);
+    }
+    for(const q of todas()) if(q.t===outra.t) cel.push([q.r,q.c]); cel.push([orbe.r,orbe.c]);
+    orbe.esp=null; // o próprio buraco negro já foi usado
+  } else {
+    const bombas=[ea,eb].filter(e=>e==="bomba").length;
+    if(bombas===2){ for(let r=b.r-2;r<=b.r+2;r++) for(let c=b.c-2;c<=b.c+2;c++) if(dentro(r,c)) cel.push([r,c]); }
+    else if(bombas===1){ for(let d=-1;d<=1;d++){ for(let c=0;c<N;c++) if(dentro(b.r+d,c)) cel.push([b.r+d,c]); for(let r=0;r<N;r++) if(dentro(r,b.c+d)) cel.push([r,b.c+d]); } raio({esp:"rh",r:b.r,c:b.c,t:a.t}); raio({esp:"rv",r:b.r,c:b.c,t:a.t}); }
+    else { for(let c=0;c<N;c++) cel.push([b.r,c]); for(let r=0;r<N;r++) cel.push([r,b.c]); raio({esp:"rh",r:b.r,c:b.c,t:a.t}); raio({esp:"rv",r:b.r,c:b.c,t:b.t}); }
+    a.esp=null; b.esp=null;
+  }
+  tremor=14; SOM.bomba(); navigator.vibrate&&navigator.vibrate(60);
+  const n=await limpar(cel); somarPontos(n*25, (b.c+.5)*CEL+8, (b.r+.5)*CEL+8, true);
+  textoVoa(ea==="orbe"||eb==="orbe" ? "🔮 SUMIU TUDO!" : "💥 COMBO ESPACIAL!", TW/2+8, TW*.3, true);
+  await gravidade(); await resolver(null);
+}
+async function trocar(r1,c1,r2,c2){
+  if(ocupado||!rodando) return; if(!dentro(r2,c2)) return;
+  ocupado=true; const a=grade[r1][c1], b=grade[r2][c2];
+  SOM.troca();
+  grade[r1][c1]=b; grade[r2][c2]=a; a.r=r2;a.c=c2; b.r=r1;b.c=c1;
+  await Promise.all([anima(a,{x:c2*CEL,y:r2*CEL},150), anima(b,{x:c1*CEL,y:r1*CEL},150)]);
+  const especial = a.esp==="orbe"||b.esp==="orbe"||(a.esp&&b.esp);
+  if(especial){ jogadas++; await trocaEspecial(a,b); }
+  else if(acharTrincas().length){ jogadas++; await resolver([{r:a.r,c:a.c},{r:b.r,c:b.c}]); }
+  else { SOM.errado(); grade[r1][c1]=a; grade[r2][c2]=b; a.r=r1;a.c=c1; b.r=r2;b.c=c2; await Promise.all([anima(a,{x:c1*CEL,y:r1*CEL},150), anima(b,{x:c2*CEL,y:r2*CEL},150)]); }
+  if(!temJogada()) await embaralhar();
+  ocupado=false;
+}
+async function embaralhar(){
+  textoVoa("🔀 EMBARALHANDO…", TW/2+8, TW/2, true);
+  const ps=[...todas()]; let tipos;
+  do { tipos=ps.map(p=>p.esp?p.t:rnd(TIPOS)); ps.forEach((p,i)=>p.t=tipos[i]); } while(acharTrincas().length || !temJogada());
+  await Promise.all(ps.map(p=>anima(p,{rot:6.28},400).then(()=>p.rot=0)));
+}
+
+/* ════════════════════════ TOQUE / ARRASTAR ════════════════════════ */
+let inicioToque=null, selecionada=null;
+function celulaDo(e){ const r=tab.getBoundingClientRect(); const x=(e.clientX-r.left), y=(e.clientY-r.top); return { r:Math.floor(y/CEL), c:Math.floor(x/CEL), x, y }; }
+tab.addEventListener("pointerdown", e=>{ if(!rodando||ocupado) return; const p=celulaDo(e); if(!dentro(p.r,p.c)) return; inicioToque=p; tab.setPointerCapture(e.pointerId); });
+tab.addEventListener("pointermove", e=>{ if(!inicioToque) return; const p=celulaDo(e); const dx=p.x-inicioToque.x, dy=p.y-inicioToque.y;
+  if(Math.max(Math.abs(dx),Math.abs(dy))>CEL*.35){ const s=inicioToque; inicioToque=null; selecionada=null;
+    if(Math.abs(dx)>Math.abs(dy)) trocar(s.r,s.c,s.r,s.c+(dx>0?1:-1)); else trocar(s.r,s.c,s.r+(dy>0?1:-1),s.c); } });
+tab.addEventListener("pointerup", e=>{ if(!inicioToque) return; const s=inicioToque; inicioToque=null;
+  // toque-toque: seleciona e depois toca a vizinha
+  if(selecionada && Math.abs(selecionada.r-s.r)+Math.abs(selecionada.c-s.c)===1){ const a=selecionada; selecionada=null; trocar(a.r,a.c,s.r,s.c); }
+  else selecionada = (selecionada && selecionada.r===s.r && selecionada.c===s.c) ? null : {r:s.r,c:s.c}; });
+
+/* ════════════════════════ DESENHO DO TABULEIRO ════════════════════════ */
+function desenhaTab(dt){
+  tg.clearRect(0,0,TW,TW);
+  tg.save();
+  if(tremor>0){ tg.translate((Math.random()-.5)*tremor,(Math.random()-.5)*tremor); tremor=Math.max(0,tremor-dt*40); }
+  // casas
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){ tg.fillStyle=(r+c)%2?"rgba(120,70,220,.20)":"rgba(70,30,150,.26)"; const p=3; tg.beginPath(); tg.roundRect?tg.roundRect(c*CEL+p/2,r*CEL+p/2,CEL-p,CEL-p,8):tg.rect(c*CEL+p/2,r*CEL+p/2,CEL-p,CEL-p); tg.fill(); }
+  if(selecionada){ tg.strokeStyle="#fff"; tg.lineWidth=3; tg.shadowColor="#ff4fd1"; tg.shadowBlur=14; tg.strokeRect(selecionada.c*CEL+3,selecionada.r*CEL+3,CEL-6,CEL-6); tg.shadowBlur=0; }
+  // gemas
+  const t=performance.now()/1000;
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){ const p=grade[r][c]; if(!p) continue;
+    let spr = p.esp==="orbe"?SPR.orbe : p.esp==="rh"?SPR.rh[p.t] : p.esp==="rv"?SPR.rv[p.t] : p.esp==="bomba"?SPR.b[p.t] : SPR.g[p.t];
+    if(!spr) continue;
+    const w=spr.width/DPR, pul = p.esp? 1+.06*Math.sin(t*6+p.id): 1;
+    tg.save(); tg.globalAlpha=p.alfa; tg.translate(p.x+CEL/2,p.y+CEL/2); tg.rotate(p.rot + (p.esp==="orbe"?t*1.5:0)); tg.scale(p.esc*pul,p.esc*pul);
+    tg.drawImage(spr,-w/2,-w/2,w,w); tg.restore(); }
+  // raios dos foguetes
+  raios = raios.filter(z=>{ z.vida-=dt*2.5; if(z.vida<=0) return false; tg.save(); tg.globalAlpha=z.vida; tg.shadowColor=z.cor; tg.shadowBlur=20; tg.fillStyle="#fff";
+    if(z.h) tg.fillRect(0,z.r*CEL+CEL*.38,TW,CEL*.24); else tg.fillRect(z.c*CEL+CEL*.38,0,CEL*.24,TW); tg.restore(); return true; });
+  // partículas
+  particulas = particulas.filter(q=>{ q.vida-=dt*1.6; if(q.vida<=0) return false; q.vy+=500*dt; q.x+=q.vx*dt; q.y+=q.vy*dt;
+    tg.globalAlpha=q.vida; tg.fillStyle=q.cor; tg.beginPath(); tg.arc(q.x,q.y,q.r,0,7); tg.fill(); tg.globalAlpha=1; return true; });
+  tg.restore();
+}
+
+/* ════════════════════════ LOOP ════════════════════════ */
+let ultimo=performance.now();
+function loop(agora){
+  const dt=Math.min(.05,(agora-ultimo)/1000); ultimo=agora;
+  tweens = tweens.filter(tw=>{ tw.t+=dt*1000; const k=Math.min(1,tw.t/tw.dur), e=tw.ease(k); for(const p in tw.para) tw.obj[p]=tw.de[p]+(tw.para[p]-tw.de[p])*e; if(k>=1){ tw.res(); return false; } return true; });
+  desenhaCeu(dt); desenhaTab(dt);
+  if(pontosMostrados<pontos){ pontosMostrados=Math.min(pontos, pontosMostrados+Math.max(1,Math.ceil((pontos-pontosMostrados)*.18))); elPontos.textContent=pontosMostrados.toLocaleString("pt-BR"); }
+  if(rodando){
+    const resta=Math.max(0,(fimEm-Date.now())/1000);
+    elTempo.textContent=Math.floor(resta/60)+":"+String(Math.floor(resta%60)).padStart(2,"0");
+    elBarra.style.width=(resta/DURACAO*100)+"%";
+    $("caixaTempo").classList.toggle("alerta", resta<=10);
+    if(resta<=5 && Math.ceil(resta)!==ultimoBip){ ultimoBip=Math.ceil(resta); SOM.bip(); }
+    if(resta<=0) terminar();
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ════════════════════════ SERVIDOR (link do bot) ════════════════════════ */
+let info = null;
+async function api(rota, corpo){
+  const r = await fetch(API+rota+(corpo?"":"?t="+encodeURIComponent(TOKEN)), corpo?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({t:TOKEN,...corpo})}:{});
+  return r.json();
+}
+async function carregar(){
+  if(!TOKEN){ $("iniTitulo").textContent="🎮 MODO TREINO"; $("iniTexto").textContent="Sem link do bot: essa partida não vale ranking. Peça seu link no grupo com o comando do jogo."; $("modoTxt").textContent="🎮 Treino (não vale ranking)"; $("btnJogar").disabled=false; return; }
+  try{
+    info = await api("/info");
+    if(!info.ok){ $("iniTitulo").textContent="⚠️ LINK INVÁLIDO"; $("iniTexto").textContent=info.erro||"Esse link já foi usado ou expirou. Peça outro no grupo."; return; }
+    DURACAO = info.duracao || 90;
+    if(info.whatsapp) $("btnZap").href = info.whatsapp;
+    if(info.modo==="duelo"){
+      $("iniTitulo").textContent="⚔️ DUELO VALENDO";
+      $("iniVs").innerHTML=`<div class="vs"><span></span><i>VS</i><span></span></div>`;
+      const s=$("iniVs").querySelectorAll("span"); s[0].textContent=info.nome||"Você"; s[1].textContent=info.oponente||"Oponente";
+      $("iniTexto").textContent=`Você tem ${DURACAO} segundos. Quem fizer mais pontos vence! Só dá pra jogar uma vez.`;
+      $("modoTxt").textContent="⚔️ "+(info.nome||"Você")+" vs "+(info.oponente||"Oponente");
+    } else {
+      $("iniTitulo").textContent="🎮 PARTIDA SOLO";
+      $("iniTexto").textContent=`${DURACAO} segundos pra fazer o máximo de pontos. Vale pro ranking!` + (info.recorde?` Seu recorde: ${Number(info.recorde).toLocaleString("pt-BR")}.`:"");
+      $("modoTxt").textContent="🎮 "+(info.nome||"Solo")+" · vale ranking";
+    }
+    $("btnJogar").disabled=false;
+  }catch{ $("iniTitulo").textContent="⚠️ SEM CONEXÃO"; $("iniTexto").textContent="Não consegui falar com o bot. Confere sua internet e abre o link de novo."; }
+}
+async function comecar(){
+  $("btnJogar").disabled=true; ctxAudio();
+  if(TOKEN){ try{ const r=await api("/inicio",{}); if(!r.ok){ $("iniTexto").textContent=r.erro||"Link já usado."; return; } }catch{ $("iniTexto").textContent="Sem conexão com o bot."; $("btnJogar").disabled=false; return; } }
+  $("telaInicio").classList.add("oculta");
+  const conta=$("conta"); conta.style.display="flex";
+  for(const n of ["3","2","1","VAI!"]){ conta.textContent=n; SOM.bip(); await espera(650); }
+  conta.style.display="none";
+  pontos=0; pontosMostrados=0; jogadas=0; maxCombo=1; elPontos.textContent="0"; poder=0; atualizarPoder();
+  fimEm = Date.now()+DURACAO*1000; rodando=true;
+}
+let terminou=false;
+async function terminar(){
+  if(terminou) return; terminou=true; rodando=false; selecionada=null;
+  while(ocupado) await espera(60);  // espera a cascata acabar (os pontos dela contam)
+  SOM.fim();
+  $("fimPontos").textContent=pontos.toLocaleString("pt-BR");
+  $("fimDeboche").textContent=debocheFinal(pontos);
+  $("telaFim").classList.remove("oculta");
+  if(!TOKEN){ $("fimTexto").textContent="Modo treino: não vale ranking."; return; }
+  try{
+    const r = await api("/fim",{ pontos, jogadas, combo:maxCombo });
+    if(!r.ok){ $("fimTexto").textContent="⚠️ "+(r.erro||"Não consegui salvar."); return; }
+    if(r.modo==="duelo"){
+      $("fimTexto").textContent = r.aguardando ? `Pontuação salva! Agora é esperar ${r.oponente||"o oponente"} jogar. O resultado sai no grupo.` : `Duelo encerrado! O resultado já saiu no grupo.`;
+    } else {
+      $("fimTexto").textContent = r.posicao ? (r.novoRecorde?"🏆 NOVO RECORDE! ":"") + `Você está em #${r.posicao} de ${r.total} no ranking.` : "Faça pontos pra entrar no ranking!";
+    }
+    $("fimAviso").textContent="Joga de novo ou volta pro WhatsApp, você que manda 💜";
+  }catch{ $("fimTexto").textContent="⚠️ Sem conexão: não consegui mandar sua pontuação."; }
+}
+$("btnJogar").onclick = comecar;
+// 🔄 jogar de novo: pede um link novo pro bot (vale ranking) e recomeça
+$("btnDeNovo").onclick = async () => {
+  const b=$("btnDeNovo"); b.disabled=true; b.textContent="⏳ PREPARANDO…";
+  if(!TOKEN){ location.reload(); return; }
+  try{ const r=await api("/novo",{}); if(r.ok&&r.t){ location.href=location.pathname+"?t="+encodeURIComponent(r.t); return; } $("fimAviso").textContent="⚠️ "+(r.erro||"Não deu pra criar outra partida."); }
+  catch{ $("fimAviso").textContent="⚠️ Sem conexão com o bot."; }
+  b.disabled=false; b.textContent="🔄 JOGAR DE NOVO";
+};
+
+/* ════════════════════════ INÍCIO ════════════════════════ */
+function redim(){ redimCeu(); redimTab(); }
+$("fotoIni").style.backgroundImage = $("fotoFim").style.backgroundImage = `url(${BASE}/rosto.png)`;
+$("btnPoder").style.backgroundImage = `url(${BASE}/rosto.png)`;
+function debocheFinal(p){
+  if(p>=40000) return "Tá… eu admito. Você foi bem. Só hoje, hein 💜";
+  if(p>=20000) return "Nada mal, senpai. Quase me impressionou~";
+  if(p>=8000)  return "Mediano. Igual sua vida amorosa, hehe~";
+  return "Sério isso? Até de olho fechado eu faço mais 😏";
+}
+addEventListener("resize", redim);
+redimCeu(); preencherInicial(); redimTab();
+requestAnimationFrame(loop);
+carregar();
+</script>
+</body>
+</html>

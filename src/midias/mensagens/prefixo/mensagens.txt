@@ -1,0 +1,6 @@
+# Prefixo: se a mensagem sair em texto, ela já fala o prefixo (use {prefixo}).
+🔑 Ai, {usuario}... meu prefixo é *{prefixo}*. Tá escrito em todo lugar, senpai. Exemplo: *{prefixo}menu*
+😏 Perguntando prefixo de novo, {usuario}? É *{prefixo}*. Anota na testa. Ex.: *{prefixo}menu*
+🙄 *{prefixo}*, {usuario}. O prefixo é *{prefixo}*. Precisa que eu desenhe? Usa *{prefixo}menu*.
+🤭 Que fofo, {usuario} não sabe o prefixo... é *{prefixo}*, tá? Tenta *{prefixo}menu*. Hehe~
+😈 Prefixo: *{prefixo}*. Agora digita *{prefixo}menu* e para de me chamar à toa, {usuario}.
